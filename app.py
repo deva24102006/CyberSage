@@ -7,10 +7,12 @@ safe defensive best practices.
 Supports both Quick Baseline Audits and Hard / Deep System Vulnerability Audits.
 """
 
+import json
 import logging
+import os
 import platform
 from typing import Any, Dict, Optional
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, send_file, session, url_for
 
 from scanner import scan_system
 
@@ -21,6 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "cyber-sage-demo-secret-key-2026")
 
 # Temporary in-memory storage for the latest scan report.
 # Note: Designed for single-user local educational sessions.
@@ -44,6 +47,7 @@ def scan():
     mode = request.form.get("mode", "deep").strip().lower()
     if mode not in ("quick", "deep", "hard", "demo"):
         mode = "deep"
+    session["scan_mode"] = mode
 
     logger.info("Starting security configuration scan (mode: %s)...", mode)
     try:
@@ -107,16 +111,60 @@ def results():
     unless mode parameter is provided (supports stateless serverless instances).
     """
     global latest_report
-    mode = request.args.get("mode")
+    mode = request.args.get("mode") or session.get("scan_mode")
     if latest_report is None:
         if mode in ("quick", "deep", "hard", "demo"):
             logger.info("Stateless/cloud request detected with mode '%s'; generating report.", mode)
             latest_report = scan_system(mode=mode)
+        elif platform.system() != "Windows":
+            logger.info("Cloud host detected without prior session; defaulting to deep audit simulation.")
+            latest_report = scan_system(mode="deep")
         else:
             logger.info("No prior scan found; redirecting user to home.")
             return redirect(url_for("home"))
+    elif mode and latest_report.get("scan_mode") != mode:
+        logger.info("Switching report mode from '%s' to '%s'.", latest_report.get("scan_mode"), mode)
+        latest_report = scan_system(mode=mode)
 
     return render_template("results.html", report=latest_report)
+
+
+@app.route("/upload", methods=["POST"])
+def upload_report():
+    """
+    Accepts an exported audit_report.json from a physical Windows host
+    and renders its actual findings on this web dashboard.
+    """
+    global latest_report
+    file = request.files.get("report_file")
+    if not file or not file.filename:
+        return redirect(url_for("home"))
+
+    try:
+        data = json.load(file)
+        if "results" in data and isinstance(data["results"], list):
+            from recommendations import get_recommendation
+            findings = [get_recommendation(item) for item in data["results"]]
+            data["results"] = findings
+            data["is_simulated"] = False
+            data["environment_label"] = "Local Physical Windows PC (Uploaded Audit)"
+            latest_report = data
+            session["scan_mode"] = data.get("scan_mode", "deep")
+            logger.info("Successfully loaded uploaded audit report with %d checks.", len(findings))
+            return redirect(url_for("results"))
+    except Exception as exc:
+        logger.error("Failed to parse uploaded audit report: %s", exc)
+
+    return redirect(url_for("home"))
+
+
+@app.route("/download-auditor", methods=["GET"])
+def download_auditor():
+    """Serves the standalone 1-click batch script to audit local Windows PCs."""
+    script_path = os.path.join(app.root_path, "audit_pc.bat")
+    if os.path.exists(script_path):
+        return send_file(script_path, as_attachment=True, download_name="audit_pc.bat")
+    return redirect(url_for("home"))
 
 
 @app.errorhandler(404)

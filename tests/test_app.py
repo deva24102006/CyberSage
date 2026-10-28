@@ -111,6 +111,48 @@ class TestApp(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertIn("Page Not Found", html)
 
+    def test_upload_valid_report(self):
+        """Uploading a valid JSON audit report renders results."""
+        import io
+        import json
+        payload = {
+            "results": [
+                {
+                    "name": "Windows Firewall Profiles",
+                    "status": "SAFE",
+                    "details": "All profiles active.",
+                    "severity": "Low",
+                    "category": "Core System Defenses",
+                    "checked_at": "2026-10-28T00:00:00Z"
+                }
+            ],
+            "total_checks": 1,
+            "safe_count": 1,
+            "warning_count": 0,
+            "high_severity_count": 0,
+            "unknown_count": 0,
+            "evaluated_count": 1,
+            "hygiene_percentage": 100,
+            "scan_mode": "deep",
+            "scan_mode_label": "Local Physical Windows PC",
+            "scanned_at": "2026-10-28 00:00:00 UTC",
+            "coverage_note": "1 of 1 passed."
+        }
+        data = {
+            "report_file": (io.BytesIO(json.dumps(payload).encode("utf-8")), "audit_report.json")
+        }
+        res = self.client.post("/upload", data=data, content_type="multipart/form-data")
+        self.assertEqual(res.status_code, 302)
+        results_page = self.client.get("/results")
+        self.assertEqual(results_page.status_code, 200)
+        self.assertIn("Windows Firewall Profiles", results_page.get_data(as_text=True))
+
+    def test_download_auditor(self):
+        """Downloading auditor script returns 200 with attachment."""
+        res = self.client.get("/download-auditor")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("attachment", res.headers.get("Content-Disposition", ""))
+
 
 if __name__ == "__main__":
     unittest.main()

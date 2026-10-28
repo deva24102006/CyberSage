@@ -151,6 +151,46 @@
             </div>
         </section>
 
+        <!-- Real Local PC Audit Option (Upload & Connect) -->
+        <section class="card" style="border: 1px solid rgba(14, 165, 233, 0.35); background: rgba(14, 165, 233, 0.04); margin-bottom: 24px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+                <div style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; background: rgba(14, 165, 233, 0.15); display: flex; align-items: center; justify-content: center; color: #38bdf8;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
+                        <h3 style="font-size: 1.15rem; margin: 0;">Audit Your Physical Windows PC on this Cloud Dashboard</h3>
+                        <span class="badge-interactive-sim" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.3);">Real Hardware Audit</span>
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+                        Websites hosted on cloud servers are sandboxed from inspecting your physical laptop across the internet. 
+                        To view your <strong>actual PC's</strong> security score on this live web dashboard:
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                            <div style="font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 4px;">Step 1: Run 1-Click Auditor</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Double-click <code>audit_pc.bat</code> in your project folder, or download it:</div>
+                            <a href="/download-auditor" class="cloud-banner-link" style="font-size: 0.78rem;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Download audit_pc.bat</span>
+                            </a>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                            <div style="font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 4px;">Step 2: Upload audit_report.json</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Saved directly to your Desktop:</div>
+                            <form action="/upload" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                <input type="file" name="report_file" accept=".json" required style="font-size: 0.78rem; color: var(--text-muted); max-width: 170px;">
+                                <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 0.78rem; width: auto;">
+                                    Upload &amp; View Report
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- What We Check (Concise, 3-Column Human Overview) -->
         <section class="card">
             <h2 style="font-size: 1.3rem; margin-bottom: 6px;">How This Scanner Protects You</h2>
