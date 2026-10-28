@@ -173,6 +173,18 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(report["hygiene_percentage"], 100)
         self.assertIn("12 Checks", report["scan_mode_label"])
 
+    @patch("scanner.platform.system", return_value="Linux")
+    def test_cloud_linux_environment_simulated_audit(self, _):
+        """When deployed on Linux cloud (e.g. Vercel), scan_system generates simulated audit."""
+        report = scan_system(mode="deep")
+        self.assertTrue(report.get("is_simulated"))
+        self.assertEqual(report["total_checks"], 12)
+        self.assertEqual(report["safe_count"], 8)
+        self.assertEqual(report["warning_count"], 4)
+        self.assertEqual(report["high_severity_count"], 1)
+        self.assertEqual(report["hygiene_percentage"], 67)
+        self.assertIn("Cloud Serverless", report["environment_label"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -885,21 +885,189 @@ def check_script_block_logging(
 
 
 # ==============================================================================
-# Main Orchestration Engine
+# Main Orchestration Engine & Educational Simulation
 # ==============================================================================
+
+def generate_simulated_audit(mode: str = "deep") -> Dict[str, Any]:
+    """
+    Generates a realistic educational simulation audit report.
+    Used when running in cloud serverless environments (e.g., Linux on Vercel)
+    where physical Windows system inspection is impossible over the web.
+    """
+    checked_at = _now_iso()
+    raw_findings: List[Dict[str, Any]] = [
+        {
+            "name": "Windows Firewall Profiles",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "All network profiles (Domain, Private, Public) are active and filtering incoming traffic.",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+        {
+            "name": "Microsoft Defender Real-Time Protection",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "Microsoft Defender Antivirus real-time monitoring engine and AMService are fully active.",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+        {
+            "name": "Antivirus Threat Definitions",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "Threat definitions were updated within the last 24 hours (well within the 7-day threshold).",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+        {
+            "name": "Windows Update Service",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "Windows Update service (wuauserv) is running and configured for automatic/demand patch retrieval.",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+        {
+            "name": "User Account Control (UAC)",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "User Account Control elevation prompts (EnableLUA) are enabled, enforcing administrative privilege checks.",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+        {
+            "name": "Guest Account Hardening",
+            "category": "Core System Defenses",
+            "status": "SAFE",
+            "details": "The default built-in local Guest account is disabled, minimizing unauthenticated access surfaces.",
+            "severity": "Low",
+            "checked_at": checked_at,
+        },
+    ]
+
+    is_deep = mode.lower() in ("deep", "hard", "comprehensive")
+    if is_deep:
+        raw_findings.extend([
+            {
+                "name": "SMBv1 Legacy Protocol Exposure",
+                "category": "Exploit Surface & Legacy Protocols",
+                "status": "WARNING",
+                "details": "Legacy SMBv1 protocol is ENABLED. System is vulnerable to remote code execution (WannaCry / EternalBlue / MS17-010).",
+                "severity": "High",
+                "checked_at": checked_at,
+            },
+            {
+                "name": "Remote Desktop (RDP) & Network Level Authentication",
+                "category": "Exploit Surface & Legacy Protocols",
+                "status": "SAFE",
+                "details": "Remote Desktop connections are either disabled or strictly require Network Level Authentication (NLA / BlueKeep mitigation).",
+                "severity": "Low",
+                "checked_at": checked_at,
+            },
+            {
+                "name": "Anonymous SAM & Share Enumeration (RestrictAnonymous)",
+                "category": "Exploit Surface & Legacy Protocols",
+                "status": "SAFE",
+                "details": "Anonymous SAM account and share enumeration is restricted (RestrictAnonymous = 1).",
+                "severity": "Low",
+                "checked_at": checked_at,
+            },
+            {
+                "name": "Microsoft Defender Controlled Folder Access (Ransomware Guard)",
+                "category": "Ransomware & Malware Hardening",
+                "status": "WARNING",
+                "details": "Controlled Folder Access is DISABLED. Protected document and media folders lack ransomware write protection.",
+                "severity": "Medium",
+                "checked_at": checked_at,
+            },
+            {
+                "name": "Microsoft Defender PUA Protection",
+                "category": "Ransomware & Malware Hardening",
+                "status": "WARNING",
+                "details": "Potentially Unwanted Application (PUA) blocking is DISABLED. Adware and coin miners can be installed.",
+                "severity": "Low",
+                "checked_at": checked_at,
+            },
+            {
+                "name": "PowerShell Script Block Logging (Event ID 4104)",
+                "category": "Ransomware & Malware Hardening",
+                "status": "WARNING",
+                "details": "PowerShell Script Block Logging is NOT ENABLED. Fileless in-memory scripts will execute without Event ID 4104 auditing.",
+                "severity": "Medium",
+                "checked_at": checked_at,
+            },
+        ])
+        scan_mode_label = "Hard System Vulnerability Audit (12 Checks)"
+    else:
+        scan_mode_label = "Quick Baseline Audit (6 Checks)"
+
+    # Enrich findings with recommendations
+    findings = [get_recommendation(item) for item in raw_findings]
+
+    # Calculate metrics
+    safe_count = sum(1 for item in findings if item.get("status") == "SAFE")
+    warning_count = sum(1 for item in findings if item.get("status") == "WARNING")
+    high_severity_count = sum(
+        1 for item in findings if item.get("status") == "WARNING" and item.get("severity") == "High"
+    )
+    total_checks = len(findings)
+    evaluated_count = safe_count + warning_count
+    hygiene_percentage = round((safe_count / evaluated_count) * 100) if evaluated_count > 0 else None
+
+    return {
+        "results": findings,
+        "scan_mode": mode.lower(),
+        "scan_mode_label": scan_mode_label,
+        "total_checks": total_checks,
+        "safe_count": safe_count,
+        "warning_count": warning_count,
+        "high_severity_count": high_severity_count,
+        "unknown_count": 0,
+        "evaluated_count": evaluated_count,
+        "hygiene_percentage": hygiene_percentage,
+        "scanned_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "coverage_note": (
+            f"{safe_count} of {evaluated_count} evaluated configuration parameters passed defensive best practices. "
+            f"{warning_count} potential weaknesses were detected."
+        ),
+        "disclaimer": (
+            "Educational Notice: This scanner checks specific Windows configuration parameters and defensive controls. "
+            "A high hygiene score indicates solid defensive baseline adherence, but does NOT guarantee complete security "
+            "or the absence of advanced malware or zero-day exploits."
+        ),
+        "is_simulated": True,
+        "environment_label": "Cloud Serverless (Vercel / Linux)",
+    }
+
 
 def scan_system(
     mode: str = "deep",
-    runner: Callable[[str, int], subprocess.CompletedProcess] = run_powershell
+    runner: Callable[[str, int], subprocess.CompletedProcess] = run_powershell,
+    force_simulation: bool = False,
 ) -> Dict[str, Any]:
     """
     Runs security checks, gathers findings, generates recommendations,
     and returns a structured report with summary metrics.
 
+    When running in a non-Windows cloud environment (such as Vercel / Linux)
+    where direct physical Windows inspection across the web is sandboxed,
+    it automatically generates an Interactive Educational Simulation Audit.
+
     Args:
         mode: "quick" for baseline 6 checks, or "deep" / "hard" for comprehensive 12 checks.
         runner: Subprocess execution function.
+        force_simulation: Set to True to generate simulated audit data regardless of host OS.
     """
+    # Cloud / Vercel environment detection:
+    is_cloud_env = platform.system() != "Windows"
+    if (is_cloud_env and runner == run_powershell) or force_simulation or mode.lower() in ("demo", "simulation"):
+        logger.info(
+            "Host OS is %s; running in Cloud Educational Simulation Mode.",
+            platform.system(),
+        )
+        return generate_simulated_audit(mode=mode)
+
     raw_findings: List[Dict[str, Any]] = []
 
     # 1-6. Core Baseline Checks
@@ -967,6 +1135,8 @@ def scan_system(
             "A high hygiene score indicates solid defensive baseline adherence, but does NOT guarantee complete security "
             "or the absence of advanced malware or zero-day exploits."
         ),
+        "is_simulated": False,
+        "environment_label": "Local Windows Host",
     }
 
     return report

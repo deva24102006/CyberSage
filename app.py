@@ -8,6 +8,7 @@ Supports both Quick Baseline Audits and Hard / Deep System Vulnerability Audits.
 """
 
 import logging
+import platform
 from typing import Any, Dict, Optional
 from flask import Flask, redirect, render_template, request, url_for
 
@@ -29,7 +30,8 @@ latest_report: Optional[Dict[str, Any]] = None
 @app.route("/", methods=["GET"])
 def home():
     """Renders the main educational dashboard."""
-    return render_template("index.html")
+    is_cloud = platform.system() != "Windows"
+    return render_template("index.html", is_cloud=is_cloud)
 
 
 @app.route("/scan", methods=["POST"])
@@ -40,7 +42,7 @@ def scan():
     """
     global latest_report
     mode = request.form.get("mode", "deep").strip().lower()
-    if mode not in ("quick", "deep", "hard"):
+    if mode not in ("quick", "deep", "hard", "demo"):
         mode = "deep"
 
     logger.info("Starting security configuration scan (mode: %s)...", mode)
@@ -90,6 +92,8 @@ def scan():
             "scanned_at": "N/A",
             "coverage_note": "Scan failed due to an unexpected internal error.",
             "disclaimer": "This educational tool does not guarantee complete security.",
+            "is_simulated": platform.system() != "Windows",
+            "environment_label": "Error State",
         }
 
     return redirect(url_for("results"))
@@ -99,11 +103,18 @@ def scan():
 def results():
     """
     Renders the most recent scan findings.
-    If no scan has been performed in this session, redirects to the dashboard.
+    If no scan has been performed in this session, redirects to the dashboard
+    unless mode parameter is provided (supports stateless serverless instances).
     """
+    global latest_report
+    mode = request.args.get("mode")
     if latest_report is None:
-        logger.info("No prior scan found; redirecting user to home.")
-        return redirect(url_for("home"))
+        if mode in ("quick", "deep", "hard", "demo"):
+            logger.info("Stateless/cloud request detected with mode '%s'; generating report.", mode)
+            latest_report = scan_system(mode=mode)
+        else:
+            logger.info("No prior scan found; redirecting user to home.")
+            return redirect(url_for("home"))
 
     return render_template("results.html", report=latest_report)
 
