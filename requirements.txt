@@ -1,0 +1,2 @@
+# Cyber Mistake Detector - Dependencies
+Flask>=3.0.0

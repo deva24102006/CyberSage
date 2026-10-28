@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+    <defs>
+        <!-- Background Gradients -->
+        <linearGradient id="bgGrad" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#070b14" />
+            <stop offset="50%" stop-color="#0a101d" />
+            <stop offset="100%" stop-color="#060910" />
+        </linearGradient>
+
+        <radialGradient id="cyanGlow" cx="50%" cy="0%" r="60%">
+            <stop offset="0%" stop-color="#0284c7" stop-opacity="0.18" />
+            <stop offset="50%" stop-color="#0369a1" stop-opacity="0.05" />
+            <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="purpleGlow" cx="90%" cy="80%" r="50%">
+            <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.12" />
+            <stop offset="60%" stop-color="#312e81" stop-opacity="0.03" />
+            <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="greenGlow" cx="10%" cy="70%" r="45%">
+            <stop offset="0%" stop-color="#059669" stop-opacity="0.08" />
+            <stop offset="100%" stop-color="#047857" stop-opacity="0" />
+        </radialGradient>
+
+        <!-- Cyber Grid Pattern -->
+        <pattern id="cyberGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1e2c48" stroke-width="0.75" stroke-opacity="0.35" />
+            <circle cx="60" cy="0" r="1.5" fill="#38bdf8" fill-opacity="0.3" />
+        </pattern>
+
+        <pattern id="denseDots" width="30" height="30" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="#334155" fill-opacity="0.25" />
+        </pattern>
+    </defs>
+
+    <!-- Base Canvas -->
+    <rect width="100%" height="100%" fill="url(#bgGrad)" />
+
+    <!-- Ambient Glow Highlights -->
+    <rect width="100%" height="100%" fill="url(#cyanGlow)" />
+    <rect width="100%" height="100%" fill="url(#purpleGlow)" />
+    <rect width="100%" height="100%" fill="url(#greenGlow)" />
+
+    <!-- Grid and Dot Matrices -->
+    <rect width="100%" height="100%" fill="url(#cyberGrid)" />
+    <rect width="100%" height="100%" fill="url(#denseDots)" />
+
+    <!-- Subtle Abstract Circuit / Security Geometry in Header Area -->
+    <g stroke="#38bdf8" stroke-opacity="0.15" stroke-width="1.2" fill="none">
+        <!-- Center circuit nodes -->
+        <path d="M 960 40 L 960 140 L 1120 220 L 1320 220" />
+        <circle cx="1320" cy="220" r="4" fill="#38bdf8" fill-opacity="0.4" />
+
+        <path d="M 960 140 L 800 220 L 600 220" />
+        <circle cx="600" cy="220" r="4" fill="#38bdf8" fill-opacity="0.4" />
+
+        <path d="M 400 120 L 520 180 L 520 340 L 460 380" />
+        <circle cx="460" cy="380" r="3" fill="#38bdf8" fill-opacity="0.3" />
+
+        <path d="M 1520 120 L 1400 180 L 1400 340 L 1460 380" />
+        <circle cx="1460" cy="380" r="3" fill="#38bdf8" fill-opacity="0.3" />
+
+        <!-- Bottom corner decorative traces -->
+        <path d="M 0 900 L 240 780 L 440 780" />
+        <circle cx="440" cy="780" r="3.5" fill="#34d399" fill-opacity="0.3" />
+
+        <path d="M 1920 900 L 1680 780 L 1480 780" />
+        <circle cx="1480" cy="780" r="3.5" fill="#818cf8" fill-opacity="0.3" />
+    </g>
+
+    <!-- Faint Shield Vector Watermark in Upper Center -->
+    <g transform="translate(860, 30) scale(0.85)" opacity="0.04" stroke="#ffffff" stroke-width="3" fill="none">
+        <path d="M120 10 L220 50 L220 140 C220 220 120 280 120 280 C120 280 20 220 20 140 L20 50 Z" />
+        <path d="M120 40 L190 70 L190 135 C190 195 120 245 120 245 C120 245 50 195 50 135 L50 70 Z" />
+    </g>
+</svg>

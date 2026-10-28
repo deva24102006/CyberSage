@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ error_title }} - Cyber Mistake Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navigation / Brand Bar -->
+    <header class="navbar">
+        <div class="nav-content">
+            <a href="{{ url_for('home') }}" class="brand-badge">
+                <span class="shield-icon">&#x1F6E1;</span>
+                Cyber Mistake Detector
+            </a>
+            <span class="env-tag">Status Code: {{ error_code }}</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <section class="card cta-card" style="margin-top: 40px;">
+            <h1 style="font-size: 2.2rem; color: #f43f5e; margin-bottom: 12px;">{{ error_title }}</h1>
+            <p style="font-size: 1.05rem; margin-bottom: 28px;">{{ error_message }}</p>
+
+            <a href="{{ url_for('home') }}" class="btn-primary">
+                Return to Dashboard
+            </a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p><strong>Cyber Mistake Detector</strong> &bull; Educational Cybersecurity Project</p>
+            <p>Safe &bull; Read-Only &bull; Local Execution Only</p>
+        </div>
+    </footer>
+
+</body>
+</html>

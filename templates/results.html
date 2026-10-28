@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Report - Cyber Mistake Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Enterprise Navbar -->
+    <header class="navbar">
+        <div class="nav-content">
+            <a href="{{ url_for('home') }}" class="brand-badge">
+                <span class="shield-logo-wrap" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                <span>Cyber Mistake Detector</span>
+            </a>
+            <div class="live-indicator">
+                <span class="pulse-dot"></span>
+                <span>AUDIT COMPLETE &bull; {{ report.scanned_at }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Results View -->
+    <main class="container">
+        <!-- Results Hero with SVG Gauge Meter -->
+        <section class="results-hero-card">
+            <div class="hero-meter-wrap">
+                <!-- SVG Circular Score Gauge -->
+                {% set pct = report.hygiene_percentage if report.hygiene_percentage is not none else 0 %}
+                {% set circumference = 314.159 %}
+                {% set offset = circumference - (pct / 100 * circumference) %}
+                <svg class="gauge-svg" viewBox="0 0 120 120" aria-label="Hygiene Score: {{ report.hygiene_percentage }}%">
+                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="gauge-fill {% if pct >= 70 %}gauge-fill-safe{% else %}gauge-fill-warn{% endif %}" 
+                            cx="60" cy="60" r="50"
+                            stroke-dasharray="314.159"
+                            stroke-dashoffset="{{ offset }}"></circle>
+                </svg>
+
+                <div class="meter-stats">
+                    <div class="meter-score-text">
+                        {% if report.hygiene_percentage is not none %}{{ report.hygiene_percentage }}%{% else %}N/A{% endif %}
+                    </div>
+                    <div class="meter-label">Hygiene Rating</div>
+                </div>
+            </div>
+
+            <div class="hero-summary-text">
+                <h2>System Vulnerability Audit Report</h2>
+                <p>{{ report.coverage_note }}</p>
+                <p style="margin-top: 8px; font-size: 0.82rem; color: var(--text-muted); font-family: Consolas, monospace;">
+                    Scope: <strong>{{ report.scan_mode_label }}</strong> &bull; Completed: {{ report.scanned_at }}
+                </p>
+            </div>
+        </section>
+
+        <!-- Metric Counter Grid -->
+        <div class="grid-4">
+            <div class="stat-card">
+                <div class="stat-value stat-total">{{ report.total_checks }}</div>
+                <div class="stat-label">Total Checks</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value stat-safe">{{ report.safe_count }}</div>
+                <div class="stat-label">Best Practice Passed</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value stat-warn">{{ report.warning_count }}</div>
+                <div class="stat-label">Weaknesses Detected</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value {% if report.high_severity_count > 0 %}stat-high{% else %}stat-safe{% endif %}">
+                    {{ report.high_severity_count }}
+                </div>
+                <div class="stat-label">High Severity Items</div>
+            </div>
+        </div>
+
+        <!-- Interactive Search & Filter Toolbar -->
+        <section class="toolbar-wrap">
+            <div class="toolbar-top">
+                <div class="search-box">
+                    <span class="search-icon-wrap" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
+                    <input type="text" id="checkSearch" placeholder="Filter checks by name, keyword, or CVE reference..." aria-label="Search security checks">
+                </div>
+
+                <div class="toolbar-actions">
+                    <button type="button" class="btn-secondary" id="toggleAllAccordions">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        <span>Expand All Guidance</span>
+                    </button>
+                    <button type="button" class="btn-secondary" id="printReportBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        <span>Print / Save PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="filter-pills" role="tablist" aria-label="Filter findings by status or category">
+                    <button type="button" class="filter-btn active" data-filter="all">All ({{ report.total_checks }})</button>
+                    <button type="button" class="filter-btn" data-filter="warning">Weaknesses ({{ report.warning_count }})</button>
+                    <button type="button" class="filter-btn" data-filter="high">High Severity ({{ report.high_severity_count }})</button>
+                    <button type="button" class="filter-btn" data-filter="safe">Passed ({{ report.safe_count }})</button>
+                    <button type="button" class="filter-btn" data-filter="exploit">Exploit Surface</button>
+                    <button type="button" class="filter-btn" data-filter="ransomware">Ransomware</button>
+                    <button type="button" class="filter-btn" data-filter="core">Core Baselines</button>
+                </div>
+
+                <div id="visibleCheckCount" style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
+                    Showing {{ report.total_checks }} of {{ report.total_checks }} checks
+                </div>
+            </div>
+        </section>
+
+        <!-- Individual Finding Cards -->
+        <section id="findingsList">
+            {% for item in report.results %}
+                {% set status_lower = item.status.lower() %}
+                {% set severity_lower = item.severity.lower() %}
+                <div class="result-card status-{{ status_lower }}"
+                     data-status="{{ status_lower }}"
+                     data-category="{{ item.category or 'Core System Defenses' }}"
+                     data-severity="{{ item.severity }}">
+                     
+                    <!-- Card Header -->
+                    <div class="result-header">
+                        <div class="card-title-group">
+                            {% if item.category %}
+                                <span class="category-tag">{{ item.category }}</span>
+                            {% endif %}
+                            <span class="result-title">{{ item.name }}</span>
+                        </div>
+                        <div class="badge-group">
+                            <span class="severity-pill {% if item.severity == 'High' and item.status == 'WARNING' %}severity-high{% endif %}">
+                                Severity: {{ item.severity }}
+                            </span>
+                            <span class="status-badge badge-{{ status_lower }}">{{ item.status }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Observed State Monospace Box -->
+                    <div class="result-details">
+                        <strong>Observed State:</strong> {{ item.details }}
+                    </div>
+
+                    <!-- Structured Recommendation Accordion -->
+                    {% if item.recommendation %}
+                    <details class="recommendation-details" {% if item.status == 'WARNING' %}open{% endif %}>
+                        <summary class="recommendation-summary">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--brand-accent);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <span><strong>Assessment:</strong> {{ item.recommendation.summary }}</span>
+                            </span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);"><polyline points="6 9 12 15 18 9"/></svg>
+                        </summary>
+                        <div class="recommendation-body">
+                            <div class="rec-section">
+                                <div class="rec-label">Verification Scope</div>
+                                <div class="rec-content">{{ item.recommendation.what_checked }}</div>
+                            </div>
+
+                            <div class="rec-section">
+                                <div class="rec-label">Technical Significance</div>
+                                <div class="rec-content">{{ item.recommendation.what_it_means }}</div>
+                            </div>
+
+                            <div class="rec-section">
+                                <div class="rec-label">Threat Vector &amp; Exploit Impact</div>
+                                <div class="rec-content">{{ item.recommendation.why_it_matters }}</div>
+                            </div>
+
+                            <div class="rec-section">
+                                <div class="rec-label">Remediation Steps (Windows Settings GUI)</div>
+                                <ul class="steps-list">
+                                    {% for step in item.recommendation.next_steps %}
+                                        <li>{{ step }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            {% if item.recommendation.cli_command %}
+                            <div class="rec-section" style="margin-top: 12px;">
+                                <div class="rec-label" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                                    <span style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                                        <span>Terminal Command (Quick Remediation)</span>
+                                    </span>
+                                    <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 3px; background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                        Run as Administrator
+                                    </span>
+                                </div>
+                                <div class="cli-box">
+                                    <code class="cli-code">{{ item.recommendation.cli_command }}</code>
+                                    <button type="button" class="btn-copy" data-copy="{{ item.recommendation.cli_command }}">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                        <span>Copy Command</span>
+                                    </button>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 5px;">
+                                    Note: Requires an elevated terminal. Search for <strong>cmd</strong> or <strong>Terminal</strong> in the Start menu and select <em>Run as administrator</em>.
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if item.recommendation.reference %}
+                            <div class="ref-tag">
+                                <strong>Standard:</strong> {{ item.recommendation.reference }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </details>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </section>
+
+        <!-- Defensive Security Principles Disclaimer -->
+        <div class="disclaimer-box warning">
+            <h4>Defensive Security Principles</h4>
+            <p>{{ report.disclaimer }}</p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="results-actions">
+            <a href="{{ url_for('home') }}" class="btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Return to Dashboard</span>
+            </a>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <form action="{{ url_for('scan') }}" method="POST" class="scan-form" style="display: inline-block;">
+                    <input type="hidden" name="mode" value="deep">
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 20px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span>Rerun Hard Scan</span>
+                    </button>
+                </form>
+
+                <form action="{{ url_for('scan') }}" method="POST" class="scan-form" style="display: inline-block;">
+                    <input type="hidden" name="mode" value="quick">
+                    <button type="submit" class="btn-secondary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>Run Quick Baseline</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scan Progress Overlay -->
+    <div id="scanOverlay" class="scan-overlay" role="dialog" aria-modal="true" aria-label="Audit in progress">
+        <div class="spinner"></div>
+        <div class="scan-overlay-title">Executing Host Security Audit...</div>
+        <div class="scan-overlay-desc">Updating local configuration audit in read-only mode. Please wait.</div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p><strong>Cyber Mistake Detector</strong> &bull; Educational Defensive Cybersecurity Project</p>
+            <p>Safe Execution &bull; Read-Only Local Assessment &bull; Zero External Data Transmission</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
