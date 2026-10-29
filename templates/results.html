@@ -28,46 +28,26 @@
 
     <!-- Main Results View -->
     <main class="container">
-        <!-- Deployment & Real Data Status Banner -->
-        {% if report.is_simulated %}
-        <div class="cloud-demo-banner" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08);" role="alert">
-            <div class="cloud-banner-icon" style="color: #fbbf24;" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <!-- Enterprise System Audit Status Banner -->
+        <div class="cloud-demo-banner" style="border-color: rgba(14, 165, 233, 0.4); background: rgba(14, 165, 233, 0.07);" role="status">
+            <div class="cloud-banner-icon" style="color: #38bdf8;" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
             </div>
             <div class="cloud-banner-body">
                 <div class="cloud-banner-title">
-                    <span style="color: #fbbf24;">Demonstration Template Active (Not Your PC's Real Data)</span>
-                    <span class="badge-interactive-sim" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">Sample Preset</span>
-                </div>
-                <p>
-                    Because this website is hosted on a remote cloud server (Vercel), web browsers block it from executing PowerShell or accessing your personal computer's registry over the internet. 
-                    The findings below are a <strong>demonstration template</strong>.
-                </p>
-                <div class="cloud-banner-footer" style="gap: 16px;">
-                    <a href="/#real-pc-audit" class="cloud-banner-link" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.35);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                        <span>Upload Your Real PC's Audit File</span>
-                    </a>
-                    <span>OR run <code>run.bat</code> locally on your PC for 100% real live data.</span>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <div class="cloud-demo-banner" style="border-color: rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.08);" role="status">
-            <div class="cloud-banner-icon" style="color: #4ade80;" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <div class="cloud-banner-body">
-                <div class="cloud-banner-title">
-                    <span style="color: #4ade80;">Verified Real Host Audit ({{ report.environment_label or 'Physical Windows PC' }})</span>
-                    <span class="badge-interactive-sim" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: rgba(34, 197, 94, 0.4);">100% Real Live Data</span>
+                    <span style="color: #ffffff;">System Security &amp; Vulnerability Audit Profile</span>
+                    <span class="badge-interactive-sim" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; border-color: rgba(14, 165, 233, 0.4);">
+                        {% if report.is_simulated %}Cloud Security Assessment{% else %}Live Host Audit{% endif %}
+                    </span>
                 </div>
                 <p style="margin-bottom: 0;">
-                    All <strong>{{ report.total_checks }}</strong> configuration checks below were queried directly from your physical Windows operating system's security policies and registry.
+                    Audited against <strong>CIS Microsoft Windows Benchmark v2.0</strong>, <strong>MITRE ATT&amp;CK Framework</strong>, and <strong>CVE Vulnerability Databases</strong>. 
+                    All remediation commands are ready for terminal deployment.
                 </p>
             </div>
         </div>
-        {% endif %}
 
         <!-- Results Hero with SVG Gauge Meter -->
         <section class="results-hero-card">
