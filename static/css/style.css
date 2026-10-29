@@ -82,6 +82,15 @@ html {
 
 body {
     background-color: var(--surface-canvas);
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(9, 13, 22, 0.90) 0%, rgba(9, 13, 22, 0.95) 100%),
+        url('../images/network-bg.png'),
+        url('../images/network-bg.svg');
+    background-size: cover, cover, cover, cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 0.875rem;
@@ -273,6 +282,21 @@ main.container {
     margin-bottom: 24px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-subtle);
+}
+
+.page-header.intro-hero {
+    background-color: rgba(17, 24, 39, 0.5);
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(13, 19, 31, 0.82) 0%, rgba(9, 13, 22, 0.90) 100%),
+        url('../images/network-bg.png'),
+        url('../images/network-bg.svg');
+    background-size: cover, cover, cover, cover;
+    background-position: center 15%;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-sm);
 }
 
 .page-title-group h1 {
@@ -1100,6 +1124,14 @@ footer p {
 }
 
 @media (max-width: 640px) {
+    body {
+        background-attachment: scroll; /* Smooth, high-performance scrolling on mobile devices */
+    }
+
+    .page-header.intro-hero {
+        padding: 16px 14px;
+    }
+
     .nav-content {
         padding: 0 16px;
     }

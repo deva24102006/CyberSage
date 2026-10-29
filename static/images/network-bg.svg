@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Background Base Gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#070a12" />
+      <stop offset="100%" stop-color="#05070c" />
+    </linearGradient>
+
+    <!-- Subtle Radial Glow in Top Center (Header Area) -->
+    <radialGradient id="topGlow" cx="50%" cy="10%" r="55%">
+      <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.12" />
+      <stop offset="60%" stop-color="#0369a1" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#090d16" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Secondary Ambient Corner Accents -->
+    <radialGradient id="cornerGlowRight" cx="95%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.07" />
+      <stop offset="100%" stop-color="#090d16" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="cornerGlowLeft" cx="5%" cy="75%" r="45%">
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#090d16" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Precision Network Matrix Pattern -->
+    <pattern id="dotGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="30" cy="30" r="0.75" fill="#38bdf8" fill-opacity="0.16" />
+      <line x1="0" y1="30" x2="60" y2="30" stroke="#1e293b" stroke-width="0.35" stroke-opacity="0.25" stroke-dasharray="2 8" />
+      <line x1="30" y1="0" x2="30" y2="60" stroke="#1e293b" stroke-width="0.35" stroke-opacity="0.25" stroke-dasharray="2 8" />
+    </pattern>
+  </defs>
+
+  <!-- Deep Canvas Background -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)" />
+
+  <!-- Ambient Glow Layers -->
+  <rect width="100%" height="100%" fill="url(#topGlow)" />
+  <rect width="100%" height="100%" fill="url(#cornerGlowRight)" />
+  <rect width="100%" height="100%" fill="url(#cornerGlowLeft)" />
+
+  <!-- Matrix Grid Overlay -->
+  <rect width="100%" height="100%" fill="url(#dotGrid)" />
+
+  <!-- Abstract Interconnected Digital Network Mesh -->
+  <g stroke="#38bdf8" stroke-width="0.8" fill="none" opacity="0.28">
+    <!-- Cluster Alpha: Top Left to Center Conduits -->
+    <path d="M 120 80 L 260 140 L 440 140 L 580 240 L 760 240 L 960 360" />
+    <path d="M 260 140 L 320 280 L 500 320 L 580 240" />
+    <path d="M 440 140 L 560 60 L 720 100 L 760 240" />
+    <path d="M 720 100 L 920 120 L 1080 80 L 1260 160" />
+    <path d="M 960 360 L 1120 300 L 1260 160" />
+
+    <!-- Cluster Beta: Top Right / Central Spine -->
+    <path d="M 1260 160 L 1420 140 L 1600 220 L 1780 180" />
+    <path d="M 1420 140 L 1480 300 L 1640 340 L 1600 220" />
+    <path d="M 1120 300 L 1240 440 L 1440 460 L 1480 300" />
+    <path d="M 960 360 L 960 520 L 1140 600 L 1240 440" />
+
+    <!-- Cluster Gamma: Mid / Lower Network Topology -->
+    <path d="M 320 280 L 220 440 L 380 560 L 500 500 L 500 320" />
+    <path d="M 380 560 L 540 680 L 740 620 L 740 480 L 580 440" />
+    <path d="M 740 480 L 960 520" />
+    <path d="M 740 620 L 920 760 L 1100 720 L 1140 600" />
+    <path d="M 1100 720 L 1280 820 L 1460 760 L 1440 600 L 1440 460" />
+    <path d="M 1460 760 L 1620 700 L 1760 780" />
+    <path d="M 1640 340 L 1740 480 L 1680 620 L 1620 700" />
+
+    <!-- Secondary Telemetry Traces -->
+    <path d="M 80 480 L 220 440 L 160 620 L 260 740 L 380 560" stroke-opacity="0.18" stroke-dasharray="4 6" />
+    <path d="M 540 680 L 620 860 L 800 900 L 920 760" stroke-opacity="0.18" stroke-dasharray="4 6" />
+    <path d="M 1280 820 L 1380 960 L 1580 940 L 1620 840" stroke-opacity="0.18" stroke-dasharray="4 6" />
+    <path d="M 1440 460 L 1560 540 L 1680 620" stroke-opacity="0.2" />
+  </g>
+
+  <!-- Network Interconnection Nodes (Data Points) -->
+  <g fill="#38bdf8">
+    <!-- Primary Major Nodes -->
+    <circle cx="120" cy="80" r="2.5" fill-opacity="0.5" />
+    <circle cx="260" cy="140" r="3" fill-opacity="0.6" />
+    <circle cx="440" cy="140" r="2.5" fill-opacity="0.5" />
+    <circle cx="580" cy="240" r="3.5" fill-opacity="0.7" />
+    <circle cx="760" cy="240" r="3" fill-opacity="0.6" />
+    <circle cx="960" cy="360" r="4" fill-opacity="0.8" />
+    <circle cx="1120" cy="300" r="3.5" fill-opacity="0.7" />
+    <circle cx="1260" cy="160" r="3.5" fill-opacity="0.7" />
+    <circle cx="1420" cy="140" r="3" fill-opacity="0.6" />
+    <circle cx="1600" cy="220" r="3" fill-opacity="0.6" />
+    <circle cx="1780" cy="180" r="2.5" fill-opacity="0.5" />
+
+    <!-- Core Ring Sub-Nodes -->
+    <circle cx="320" cy="280" r="2.5" fill-opacity="0.45" />
+    <circle cx="500" cy="320" r="2.5" fill-opacity="0.45" />
+    <circle cx="720" cy="100" r="2.5" fill-opacity="0.5" />
+    <circle cx="920" cy="120" r="2" fill-opacity="0.4" />
+    <circle cx="1080" cy="80" r="2" fill-opacity="0.4" />
+    <circle cx="1480" cy="300" r="3" fill-opacity="0.6" />
+    <circle cx="1640" cy="340" r="2.5" fill-opacity="0.5" />
+
+    <!-- Mid & Lower Topology Nodes -->
+    <circle cx="220" cy="440" r="2.5" fill-opacity="0.4" />
+    <circle cx="380" cy="560" r="3" fill-opacity="0.5" />
+    <circle cx="500" cy="500" r="2.5" fill-opacity="0.4" />
+    <circle cx="540" cy="680" r="3" fill-opacity="0.55" />
+    <circle cx="740" cy="480" r="3" fill-opacity="0.5" />
+    <circle cx="740" cy="620" r="3" fill-opacity="0.5" />
+    <circle cx="960" cy="520" r="3.5" fill-opacity="0.6" />
+    <circle cx="920" cy="760" r="3.5" fill-opacity="0.6" />
+    <circle cx="1140" cy="600" r="3" fill-opacity="0.55" />
+    <circle cx="1100" cy="720" r="3" fill-opacity="0.55" />
+    <circle cx="1240" cy="440" r="3" fill-opacity="0.55" />
+    <circle cx="1440" cy="460" r="3" fill-opacity="0.55" />
+    <circle cx="1440" cy="600" r="2.5" fill-opacity="0.45" />
+    <circle cx="1280" cy="820" r="3" fill-opacity="0.5" />
+    <circle cx="1460" cy="760" r="3" fill-opacity="0.5" />
+    <circle cx="1620" cy="700" r="2.5" fill-opacity="0.45" />
+    <circle cx="1740" cy="480" r="2.5" fill-opacity="0.4" />
+    <circle cx="1680" cy="620" r="2" fill-opacity="0.4" />
+    <circle cx="1760" cy="780" r="2" fill-opacity="0.35" />
+
+    <!-- Minor Telemetry Edge Nodes -->
+    <circle cx="80" cy="480" r="1.5" fill-opacity="0.3" />
+    <circle cx="160" cy="620" r="1.5" fill-opacity="0.3" />
+    <circle cx="260" cy="740" r="2" fill-opacity="0.35" />
+    <circle cx="620" cy="860" r="2" fill-opacity="0.35" />
+    <circle cx="800" cy="900" r="2" fill-opacity="0.35" />
+    <circle cx="1380" cy="960" r="2" fill-opacity="0.35" />
+    <circle cx="1580" cy="940" r="2" fill-opacity="0.35" />
+  </g>
+
+  <!-- Concentric Target Indicators on 2 Key Gateway Nodes -->
+  <g stroke="#38bdf8" fill="none">
+    <circle cx="960" cy="360" r="9" stroke-width="0.5" stroke-opacity="0.35" stroke-dasharray="2 4" />
+    <circle cx="580" cy="240" r="7" stroke-width="0.5" stroke-opacity="0.3" stroke-dasharray="2 4" />
+    <circle cx="1260" cy="160" r="7" stroke-width="0.5" stroke-opacity="0.3" stroke-dasharray="2 4" />
+  </g>
+</svg>
