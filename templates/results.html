@@ -39,15 +39,26 @@
                 <div class="cloud-banner-title">
                     <span style="color: #ffffff;">System Security &amp; Vulnerability Audit Profile</span>
                     <span class="badge-interactive-sim" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; border-color: rgba(14, 165, 233, 0.4);">
-                        {% if report.is_simulated %}Cloud Security Assessment{% else %}Live Host Audit{% endif %}
+                        {% if report.is_simulated %}Interactive Cloud Assessment{% else %}Live Host Audit{% endif %}
                     </span>
                 </div>
                 <p style="margin-bottom: 0;">
+                    {% if report.is_simulated %}
+                    Running in <strong>Cloud Assessment Mode</strong>. To sync your physical computer's score after applying fixes: 
+                    use <strong>"Verify &amp; Mark Remediated"</strong> on any weakness below, or 
+                    <a href="javascript:void(0)" onclick="document.getElementById('quickUploadInput').click()" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">Upload Desktop audit_report.json</a>.
+                    {% else %}
                     Audited against <strong>CIS Microsoft Windows Benchmark v2.0</strong>, <strong>MITRE ATT&amp;CK Framework</strong>, and <strong>CVE Vulnerability Databases</strong>. 
                     All remediation commands are ready for terminal deployment.
+                    {% endif %}
                 </p>
             </div>
         </div>
+
+        <!-- Hidden Quick Upload Form -->
+        <form id="quickUploadForm" action="{{ url_for('upload_report') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input type="file" id="quickUploadInput" name="report_file" accept=".json" onchange="this.form.submit()">
+        </form>
 
         <!-- Results Hero with SVG Gauge Meter -->
         <section class="results-hero-card">
@@ -78,6 +89,16 @@
                 <p style="margin-top: 8px; font-size: 0.82rem; color: var(--text-muted); font-family: Consolas, monospace;">
                     Scope: <strong>{{ report.scan_mode_label }}</strong> &bull; Completed: {{ report.scanned_at }}
                 </p>
+                <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" id="resetRemediationsBtn" class="btn-secondary" style="display: none; font-size: 0.78rem; padding: 4px 12px; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        <span>Reset Remediations to Baseline</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('quickUploadInput').click()" style="font-size: 0.78rem; padding: 4px 12px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Sync Live PC (Upload audit_report.json)</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -242,6 +263,18 @@
                             {% endif %}
                         </div>
                     </details>
+                    {% endif %}
+
+                    {% if item.status == 'WARNING' %}
+                    <div class="remediation-verify-bar" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="font-size: 0.82rem; color: var(--text-secondary);">
+                            Applied this fix on your machine? Verify to update your score:
+                        </div>
+                        <button type="button" class="btn-verify-fix" data-check-name="{{ item.name }}" data-severity="{{ item.severity }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Verify &amp; Mark Remediated</span>
+                        </button>
+                    </div>
                     {% endif %}
                 </div>
             {% endfor %}

@@ -147,4 +147,173 @@ document.addEventListener("DOMContentLoaded", () => {
             window.print();
         });
     }
+
+    // 6. Interactive Remediation Verification & Dynamic Hygiene Score
+    const verifyButtons = document.querySelectorAll(".btn-verify-fix");
+    const resetBtn = document.getElementById("resetRemediationsBtn");
+    const gaugeFill = document.querySelector(".gauge-fill");
+    const meterScoreText = document.querySelector(".meter-score-text");
+    const statSafe = document.querySelector(".stat-safe");
+    const statWarn = document.querySelector(".stat-warn");
+    const statHigh = document.querySelector(".stat-high");
+
+    const STORAGE_KEY = "cybersage_remediated_checks";
+
+    function getRemediatedChecks() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        } catch {
+            return [];
+        }
+    }
+
+    function saveRemediatedChecks(list) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        } catch (e) {
+            console.error("Could not save to localStorage", e);
+        }
+    }
+
+    function showToast(msg) {
+        const existing = document.querySelector(".cyber-toast");
+        if (existing) existing.remove();
+
+        const toast = document.createElement("div");
+        toast.className = "cyber-toast";
+        toast.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>${msg}</span>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            if (toast && toast.parentNode) toast.remove();
+        }, 4000);
+    }
+
+    function recalculateDashboard() {
+        const cards = document.querySelectorAll(".result-card");
+        if (!cards.length) return;
+
+        let total = cards.length;
+        let safeCount = 0;
+        let warnCount = 0;
+        let highCount = 0;
+
+        cards.forEach((card) => {
+            const status = (card.getAttribute("data-status") || "").toLowerCase();
+            const severity = (card.getAttribute("data-severity") || "").toLowerCase();
+
+            if (status === "safe") {
+                safeCount++;
+            } else if (status === "warning") {
+                warnCount++;
+                if (severity === "high") highCount++;
+            }
+        });
+
+        const evaluated = safeCount + warnCount;
+        const pct = evaluated > 0 ? Math.round((safeCount / evaluated) * 100) : 0;
+
+        // Update score text
+        if (meterScoreText) {
+            meterScoreText.innerText = `${pct}%`;
+        }
+
+        // Update SVG circular gauge
+        if (gaugeFill) {
+            const circumference = 314.159;
+            const offset = circumference - (pct / 100 * circumference);
+            gaugeFill.style.strokeDashoffset = offset;
+            if (pct >= 70) {
+                gaugeFill.classList.remove("gauge-fill-warn");
+                gaugeFill.classList.add("gauge-fill-safe");
+            } else {
+                gaugeFill.classList.remove("gauge-fill-safe");
+                gaugeFill.classList.add("gauge-fill-warn");
+            }
+        }
+
+        // Update Stat cards
+        if (statSafe) statSafe.innerText = safeCount;
+        if (statWarn) statWarn.innerText = warnCount;
+        if (statHigh) statHigh.innerText = highCount;
+
+        // Update filter pills
+        const warnPill = document.querySelector('.filter-btn[data-filter="warning"]');
+        if (warnPill) warnPill.innerText = `Weaknesses (${warnCount})`;
+        const safePill = document.querySelector('.filter-btn[data-filter="safe"]');
+        if (safePill) safePill.innerText = `Passed (${safeCount})`;
+        const highPill = document.querySelector('.filter-btn[data-filter="high"]');
+        if (highPill) highPill.innerText = `High Severity (${highCount})`;
+
+        // Show/hide reset button
+        const remediatedList = getRemediatedChecks();
+        if (resetBtn) {
+            resetBtn.style.display = remediatedList.length > 0 ? "inline-flex" : "none";
+        }
+    }
+
+    function applyRemediation(checkName, buttonEl, persist) {
+        const card = buttonEl.closest(".result-card");
+        if (!card) return;
+
+        // Update card visual state
+        card.setAttribute("data-status", "safe");
+        card.classList.remove("status-warning");
+        card.classList.add("status-safe");
+
+        // Update status badge
+        const badge = card.querySelector(".status-badge");
+        if (badge) {
+            badge.className = "status-badge badge-safe";
+            badge.innerText = "SAFE (REMEDIATED)";
+        }
+
+        // Update button
+        buttonEl.classList.add("is-remediated");
+        buttonEl.disabled = true;
+        buttonEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>✓ Remediated &amp; Verified</span>`;
+
+        if (persist) {
+            const list = getRemediatedChecks();
+            if (!list.includes(checkName)) {
+                list.push(checkName);
+                saveRemediatedChecks(list);
+            }
+            recalculateDashboard();
+            const currentPct = meterScoreText ? meterScoreText.innerText : "";
+            showToast(`[${checkName}] verified as remediated! Score updated to ${currentPct}.`);
+        }
+    }
+
+    // Attach click handlers to verify buttons
+    verifyButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const checkName = btn.getAttribute("data-check-name");
+            if (checkName) {
+                applyRemediation(checkName, btn, true);
+            }
+        });
+    });
+
+    // Restore any previously saved remediations on page load
+    const saved = getRemediatedChecks();
+    if (saved.length > 0) {
+        verifyButtons.forEach((btn) => {
+            const checkName = btn.getAttribute("data-check-name");
+            if (checkName && saved.includes(checkName)) {
+                applyRemediation(checkName, btn, false);
+            }
+        });
+        recalculateDashboard();
+    }
+
+    // Reset button handler
+    if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+            localStorage.removeItem(STORAGE_KEY);
+            window.location.reload();
+        });
+    }
 });
