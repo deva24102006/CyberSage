@@ -161,9 +161,11 @@ def upload_report():
 @app.route("/download-auditor", methods=["GET"])
 def download_auditor():
     """Serves the standalone 1-click batch script to audit local Windows PCs."""
-    script_path = os.path.join(app.root_path, "audit_pc.bat")
+    script_path = os.path.join(app.root_path, "CyberSage_Scanner.bat")
+    if not os.path.exists(script_path):
+        script_path = os.path.join(app.root_path, "audit_pc.bat")
     if os.path.exists(script_path):
-        return send_file(script_path, as_attachment=True, download_name="audit_pc.bat")
+        return send_file(script_path, as_attachment=True, download_name="CyberSage_Scanner.bat")
     return redirect(url_for("home"))
 
 

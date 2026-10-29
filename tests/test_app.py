@@ -97,12 +97,14 @@ class TestApp(unittest.TestCase):
         response = self.client.get("/static/css/style.css")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Cyber Mistake Detector", response.get_data(as_text=True))
+        response.close()
 
     def test_static_js_served(self):
         """JavaScript client script must be accessible and non-empty."""
         response = self.client.get("/static/js/app.js")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Cyber Mistake Detector", response.get_data(as_text=True))
+        response.close()
 
     def test_custom_404_handler(self):
         """Requesting an invalid route returns HTTP 404 with custom error page."""
@@ -152,6 +154,7 @@ class TestApp(unittest.TestCase):
         res = self.client.get("/download-auditor")
         self.assertEqual(res.status_code, 200)
         self.assertIn("attachment", res.headers.get("Content-Disposition", ""))
+        res.close()
 
 
 if __name__ == "__main__":
