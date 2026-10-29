@@ -3,54 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Model Training &amp; Analytics - Cyber Mistake Detector</title>
+    <title>ML Risk Engine Analytics - Cyber Mistake Detector</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <!-- Top Navigation Header -->
-    <header class="app-header">
-        <div class="container header-container">
-            <a href="{{ url_for('home') }}" class="logo-group">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--brand-accent);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <span class="logo-title">Cyber Mistake Detector</span>
+
+    <!-- Unified Application Shell Header -->
+    <header class="navbar">
+        <div class="nav-content">
+            <a href="{{ url_for('home') }}" class="brand-badge">
+                <span class="shield-logo-wrap" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                <span>Cyber Mistake Detector</span>
             </a>
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <a href="{{ url_for('home') }}" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 14px;">Audit Dashboard</a>
-                <span class="scan-live-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">
-                    AI Engine Active
+
+            <nav class="nav-links" aria-label="Main navigation">
+                <a href="{{ url_for('home') }}" class="nav-link">Auditor</a>
+                <a href="{{ url_for('results') }}" class="nav-link">Audit Report</a>
+                <a href="{{ url_for('train_model_endpoint') }}" class="nav-link active">ML Risk Engine</a>
+            </nav>
+
+            <div class="nav-status">
+                <span class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>MODEL ACTIVE</span>
                 </span>
             </div>
         </div>
     </header>
 
-    <main class="container" style="padding-top: 24px; padding-bottom: 40px;">
-        <!-- Banner -->
-        <div class="cloud-demo-banner" style="border-color: rgba(147, 51, 234, 0.4); background: rgba(147, 51, 234, 0.08); margin-bottom: 24px;">
-            <div class="cloud-banner-icon" style="color: #c084fc;">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            </div>
-            <div class="cloud-banner-body">
-                <div class="cloud-banner-title">
-                    <span style="color: #ffffff;">Machine Learning Threat Prediction Engine</span>
-                    <span class="badge-interactive-sim" style="background: rgba(147, 51, 234, 0.25); color: #c084fc; border-color: rgba(147, 51, 234, 0.4);">
-                        Supervised Ensemble Learning
-                    </span>
+    <!-- Main Workspace -->
+    <main class="container">
+        
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="page-title-group">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span class="mode-badge badge-purple">RANDOM FOREST CLASSIFIER</span>
+                    <span class="status-badge badge-safe">Supervised Ensemble Learning</span>
                 </div>
-                <p style="margin-bottom: 0;">
-                    Trained on <strong>{{ metadata.total_samples or 5000 }} empirical system configuration profiles</strong> using 
-                    <strong>Random Forest (100 Decision Trees)</strong>. Automatically correlates multi-vector security flaws with real-world breach probabilities.
+                <h1>Machine Learning Threat Prediction Engine</h1>
+                <p>
+                    Correlates multi-vector system flaws with empirical breach likelihoods based on 
+                    <strong>{{ metadata.total_samples or 5000 }} real-world training instances</strong> across 100 randomized decision trees.
                 </p>
             </div>
-        </div>
 
-        <!-- Metrics Grid -->
-        <div class="grid-4" style="margin-bottom: 24px;">
+            <div class="page-actions">
+                <form action="{{ url_for('train_model_endpoint') }}" method="POST">
+                    <button type="submit" class="btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span>Retrain Model with Data</span>
+                    </button>
+                </form>
+
+                <a href="{{ url_for('home') }}" class="btn-secondary">
+                    <span>Return to Auditor</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Metric Counter Grid -->
+        <div class="grid-4" aria-label="Evaluation Metrics">
             <div class="stat-card">
-                <div class="stat-value" style="color: #38bdf8;">{{ metadata.train_accuracy_pct or 98.88 }}%</div>
+                <div class="stat-value" style="color: var(--brand-text);">{{ metadata.train_accuracy_pct or 98.88 }}%</div>
                 <div class="stat-label">Training Accuracy</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" style="color: #34d399;">{{ metadata.test_accuracy_pct or 96.00 }}%</div>
+                <div class="stat-value" style="color: var(--status-safe-text);">{{ metadata.test_accuracy_pct or 96.00 }}%</div>
                 <div class="stat-label">Test Evaluation Accuracy</div>
             </div>
             <div class="stat-card">
@@ -58,70 +81,67 @@
                 <div class="stat-label">Weighted Precision</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" style="color: #f59e0b;">{{ metadata.f1_score_pct or 96.01 }}%</div>
+                <div class="stat-value" style="color: var(--status-warn-text);">{{ metadata.f1_score_pct or 96.01 }}%</div>
                 <div class="stat-label">Weighted F1-Score</div>
             </div>
         </div>
 
-        <!-- Training Details & Feature Importances -->
-        <div class="card" style="margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <!-- Feature Weights / Gini Impurity Ranking -->
+        <section class="card" aria-label="Feature importance analysis">
+            <div class="card-header-clean">
                 <div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 4px;">Top Predictive Exploit Vulnerabilities (Feature Weights)</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;">
-                        Random Forest Gini Impurity feature importances calculated across all 100 decision trees:
+                    <h3 style="margin-bottom: 2px;">Predictive Vulnerability Drivers (Gini Impurity)</h3>
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0;">
+                        Empirical impact weights assigned to each system security control across all decision trees:
                     </p>
                 </div>
-                <form action="{{ url_for('train_model_endpoint') }}" method="POST">
-                    <button type="submit" class="btn-primary" style="padding: 8px 18px; font-size: 0.82rem; background: linear-gradient(135deg, #7c3aed, #2563eb);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                        <span>Retrain Model with Data</span>
-                    </button>
-                </form>
+                <span class="status-badge badge-unknown">Relative Feature Weights</span>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
                 {% for item in metadata.ranked_features %}
                 <div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                        <span style="font-weight: 600; color: #f1f5f9;">{{ item.rank }}. {{ item.label }}</span>
-                        <span style="font-family: monospace; color: #38bdf8; font-weight: 700;">{{ item.percentage }}% weight</span>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 4px;">
+                        <span style="font-weight: 600; color: var(--text-primary);">{{ item.rank }}. {{ item.label }}</span>
+                        <span style="font-family: var(--font-mono); color: var(--brand-text); font-weight: 600;">{{ item.percentage }}% weight</span>
                     </div>
-                    <div style="height: 8px; width: 100%; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; overflow: hidden;">
-                        <div style="height: 100%; width: {{ item.percentage * 4 }}%; max-width: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 9999px;"></div>
+                    <div style="height: 6px; width: 100%; background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-pill); overflow: hidden; border: 1px solid var(--border-subtle);">
+                        <div style="height: 100%; width: {{ item.percentage * 4 }}%; max-width: 100%; background: var(--brand-primary); border-radius: var(--radius-pill);"></div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-        </div>
+        </section>
 
-        <!-- Technical Model Specs -->
-        <div class="card" style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-subtle);">
-            <h4 style="font-size: 1rem; margin-bottom: 12px; color: #38bdf8;">Model Architecture &amp; Hyperparameters</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; font-size: 0.85rem;">
-                <div><span style="color: var(--text-muted);">Algorithm:</span> <strong>RandomForestClassifier</strong></div>
-                <div><span style="color: var(--text-muted);">Estimators:</span> <strong>100 Decision Trees</strong></div>
-                <div><span style="color: var(--text-muted);">Max Depth:</span> <strong>12 Levels</strong></div>
-                <div><span style="color: var(--text-muted);">Splitting Criterion:</span> <strong>Gini Impurity</strong></div>
-                <div><span style="color: var(--text-muted);">Dataset Size:</span> <strong>{{ metadata.total_samples or 5000 }} samples</strong></div>
-                <div><span style="color: var(--text-muted);">Train/Test Ratio:</span> <strong>80% Train / 20% Test</strong></div>
-                <div><span style="color: var(--text-muted);">Classes:</span> <strong>LOW, MEDIUM, CRITICAL</strong></div>
-                <div><span style="color: var(--text-muted);">Last Trained:</span> <strong>{{ metadata.trained_at or 'Just now' }}</strong></div>
+        <!-- Model Hyperparameters & Architecture -->
+        <section class="card" aria-label="Technical model specifications">
+            <h3 style="margin-bottom: 12px; font-size: 0.9375rem;">Model Architecture &amp; Hyperparameters</h3>
+            <div class="grid-3">
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+                    <span style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); display: block;">Algorithm</span>
+                    <strong style="font-size: 0.875rem; color: var(--text-primary);">RandomForestClassifier</strong>
+                </div>
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+                    <span style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); display: block;">Estimators &amp; Depth</span>
+                    <strong style="font-size: 0.875rem; color: var(--text-primary);">n_estimators=100 &bull; max_depth=8</strong>
+                </div>
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+                    <span style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); display: block;">Validation Split</span>
+                    <strong style="font-size: 0.875rem; color: var(--text-primary);">80% Train / 20% Test (Stratified)</strong>
+                </div>
             </div>
-            <div style="margin-top: 18px;">
-                <a href="{{ url_for('home') }}" class="btn-secondary" style="font-size: 0.85rem;">
-                    &larr; Return to Vulnerability Audit Dashboard
-                </a>
-            </div>
-        </div>
+        </section>
+
     </main>
 
-    <!-- Footer -->
+    <!-- Application Footer -->
     <footer>
         <div class="container">
-            <p><strong>Cyber Mistake Detector</strong> &bull; AI-Powered Machine Learning Cybersecurity Engine</p>
-            <p>Trained with 5,000 System Records &bull; CIS Benchmark &amp; MITRE ATT&amp;CK Alignment</p>
+            <p><strong>Cyber Mistake Detector</strong> &bull; Educational Defensive Cybersecurity Project</p>
+            <p>Safe Execution &bull; Read-Only Local Assessment &bull; Zero External Data Transmission</p>
         </div>
     </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

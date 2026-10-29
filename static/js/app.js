@@ -3,15 +3,16 @@
  *
  * Provides:
  * - Real-time client-side search & category filtering
- * - Expand / Collapse all accordion toggle
+ * - Keyboard shortcut support ('/' to focus search)
+ * - Expand / Collapse all guidance accordions
  * - 1-Click CLI command clipboard copy
- * - Print / PDF export
+ * - Print / PDF export formatting
  * - Scan overlay & button loading state
  * - Authoritative backend-driven remediation verification (Zero client-side score fabrication)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Clean up any legacy localStorage remediation overrides so backend remains authoritative single source of truth
+    // Purge any legacy localStorage remediation overrides so backend remains authoritative single source of truth
     try {
         localStorage.removeItem("cybersage_remediated_checks");
     } catch (_) {}
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span>&#x23F3;</span> Scanning System...`;
+                submitBtn.innerHTML = `<span class="spinner-inline"></span> <span>Running System Audit...</span>`;
             }
             if (scanOverlay) {
                 scanOverlay.style.display = "flex";
@@ -91,6 +92,15 @@ document.addEventListener("DOMContentLoaded", () => {
             searchQuery = e.target.value.trim().toLowerCase();
             filterCards();
         });
+
+        // Quick shortcut: Press '/' to focus search input
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "/" && document.activeElement !== searchInput && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
     }
 
     filterBtns.forEach((btn) => {
@@ -114,8 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 el.open = allExpanded;
             });
             toggleAllBtn.innerHTML = allExpanded
-                ? `<span>&#x25B2;</span> Collapse All Guidance`
-                : `<span>&#x25BC;</span> Expand All Guidance`;
+                ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg><span>Collapse All Guidance</span>`
+                : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg><span>Expand All Guidance</span>`;
         });
     }
 
@@ -129,12 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await navigator.clipboard.writeText(commandText);
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<span style="color: #34d399;">✓ Copied!</span>`;
-                btn.style.borderColor = "#10b981";
+                btn.innerHTML = `<span style="color: var(--status-safe-text);">✓ Copied</span>`;
 
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
-                    btn.style.borderColor = "";
                 }, 2000);
             } catch (err) {
                 console.error("Clipboard copy failed: ", err);
@@ -146,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const printBtn = document.getElementById("printReportBtn");
     if (printBtn) {
         printBtn.addEventListener("click", () => {
-            // Expand all guidance accordions before printing so full report is captured in PDF
             const detailsElements = document.querySelectorAll(".recommendation-details");
             detailsElements.forEach((el) => (el.open = true));
             window.print();
@@ -161,8 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const toast = document.createElement("div");
         toast.className = `cyber-toast ${type === "error" ? "toast-error" : ""}`;
         const icon = type === "error"
-            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
 
         toast.innerHTML = `${icon}<span>${escapeHtml(msg)}</span>`;
         document.body.appendChild(toast);
@@ -180,30 +187,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 7. Authoritative Backend Score Update (Reflects ONLY verified server data)
     function updateScoreDisplay(score, safeCount, warnCount) {
-        const gaugeFill = document.querySelector(".gauge-fill");
         const meterScoreText = document.querySelector(".meter-score-text");
         const statSafe = document.querySelector(".stat-safe");
         const statWarn = document.querySelector(".stat-warn");
+        const scoreSegSafe = document.querySelector(".score-seg-safe");
+        const scoreSegWarn = document.querySelector(".score-seg-warn");
 
         if (meterScoreText && typeof score === "number") {
             meterScoreText.innerText = `${score}%`;
         }
 
-        if (gaugeFill && typeof score === "number") {
-            const circumference = 314.159;
-            const offset = circumference - (score / 100 * circumference);
-            gaugeFill.style.strokeDashoffset = offset;
-            if (score >= 70) {
-                gaugeFill.classList.remove("gauge-fill-warn");
-                gaugeFill.classList.add("gauge-fill-safe");
-            } else {
-                gaugeFill.classList.remove("gauge-fill-safe");
-                gaugeFill.classList.add("gauge-fill-warn");
-            }
-        }
-
         if (statSafe && typeof safeCount === "number") statSafe.innerText = safeCount;
         if (statWarn && typeof warnCount === "number") statWarn.innerText = warnCount;
+
+        // Update segmented score bar
+        const total = resultCards.length || 12;
+        if (scoreSegSafe && typeof safeCount === "number") {
+            scoreSegSafe.style.width = `${Math.round((safeCount / total) * 100)}%`;
+        }
+        if (scoreSegWarn && typeof warnCount === "number") {
+            scoreSegWarn.style.width = `${Math.round((warnCount / total) * 100)}%`;
+        }
 
         // Update filter pills with authoritative counts
         if (typeof warnCount === "number") {
@@ -277,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     btn.classList.add("is-remediated");
                     btn.disabled = true;
-                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>✓ Verified Safe</span>`;
+                    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>✓ Verified Safe</span>`;
 
                     if (feedbackEl) {
                         feedbackEl.className = "verify-feedback feedback-success";
@@ -293,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Probe detected that setting is STILL INSECURE or inconclusive
                     // DO NOT MARK SAFE; SCORE DOES NOT CHANGE
                     btn.disabled = false;
-                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Re-Verify Fix</span>`;
+                    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Re-Verify Fix</span>`;
 
                     const errorMsg = data.message || "Control is still insecure on this endpoint. Score remains unchanged.";
 

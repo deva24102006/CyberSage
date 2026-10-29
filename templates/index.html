@@ -3,57 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Mistake Detector - Windows Security &amp; Vulnerability Scanner</title>
+    <title>Cyber Mistake Detector - Host Security &amp; Vulnerability Auditor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <!-- Header Navigation -->
+    <!-- Unified Application Shell Header -->
     <header class="navbar">
         <div class="nav-content">
             <a href="{{ url_for('home') }}" class="brand-badge">
                 <span class="shield-logo-wrap" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
                 </span>
                 <span>Cyber Mistake Detector</span>
             </a>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <a href="{{ url_for('train_model_endpoint') }}" class="btn-secondary" style="font-size: 0.78rem; padding: 5px 12px; border-color: rgba(147, 51, 234, 0.4); color: #c084fc;">
-                    AI Model Training
-                </a>
-                <div class="live-indicator">
+
+            <nav class="nav-links" aria-label="Main navigation">
+                <a href="{{ url_for('home') }}" class="nav-link active">Auditor</a>
+                <a href="{{ url_for('results') }}" class="nav-link">Audit Report</a>
+                <a href="{{ url_for('train_model_endpoint') }}" class="nav-link">ML Risk Engine</a>
+            </nav>
+
+            <div class="nav-status">
+                <span class="live-indicator">
                     <span class="pulse-dot"></span>
-                    <span>SYSTEM SCANNER &bull; READY</span>
-                </div>
+                    <span>ENGINE READY</span>
+                </span>
             </div>
         </div>
     </header>
 
-    <!-- Main Dashboard Container -->
+    <!-- Main Workspace -->
     <main class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            {% if is_cloud %}
-            <div>
-                <span class="cloud-pill">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
-                    <span>Cloud Security Assessment Engine &bull; Active &amp; Operational</span>
-                </span>
+        
+        <!-- Page Title & Context Header -->
+        <section class="page-header">
+            <div class="page-title-group">
+                <h1>Host Security &amp; Defensive Baseline Auditor</h1>
+                <p>
+                    Automated, read-only inspection of Windows security configurations, legacy network vectors, 
+                    and ransomware defenses aligned with CIS Benchmarks and MITRE ATT&amp;CK.
+                </p>
             </div>
-            {% endif %}
-            <div class="hero-pretitle">Automated Host &amp; Vulnerability Auditor</div>
-            <h1>Enterprise Security &amp; Vulnerability <span>Audit Suite</span></h1>
-            <p>
-                Safely inspect systems in seconds for critical security misconfigurations, disabled ransomware shields,
-                and legacy network vulnerabilities. Fully aligned with CIS Benchmarks &amp; MITRE ATT&amp;CK.
-            </p>
+
+            <div class="page-actions">
+                <a href="#endpoint-sync" class="btn-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span>Endpoint Telemetry</span>
+                </a>
+                <a href="{{ url_for('download_auditor') }}" class="btn-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Download Collector (.bat)</span>
+                </a>
+            </div>
         </section>
 
-        <!-- Scan Mode Selection Cards -->
-        <section class="cta-container">
-            <!-- Mode 1: Hard Scan (Comprehensive 12 checks) -->
+        <!-- Target Machine Identity Bar -->
+        <section class="system-identity-bar" aria-label="Host platform summary">
+            <div class="system-meta-items">
+                <div class="meta-item">
+                    <span>Target Machine:</span>
+                    <strong>{{ sys_meta.hostname or 'Localhost' }}</strong>
+                </div>
+                <div class="meta-item">
+                    <span>Environment:</span>
+                    <strong>{{ sys_meta.os_name or 'Microsoft Windows' }} {{ sys_meta.os_release or '' }} ({{ sys_meta.os_arch or 'x64' }})</strong>
+                </div>
+                <div class="meta-item">
+                    <span>Execution Mode:</span>
+                    {% if sys_meta.is_windows %}
+                    <span class="status-badge badge-safe">Local Native Probes</span>
+                    {% else %}
+                    <span class="status-badge badge-unknown">Cloud Sandbox Mode</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <span>Access:</span>
+                <code>Read-Only / Safe</code>
+            </div>
+        </section>
+
+        <!-- Previous Audit Summary (If Available) -->
+        {% if latest_scan %}
+        <section class="card" style="border-left: 3px solid {% if latest_scan.hygiene_percentage and latest_scan.hygiene_percentage >= 70 %}var(--status-safe-text){% else %}var(--status-warn-text){% endif %}; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">
+                            Active Session Latest Audit
+                        </span>
+                        <span class="status-badge {% if latest_scan.hygiene_percentage and latest_scan.hygiene_percentage >= 70 %}badge-safe{% else %}badge-warning{% endif %}">
+                            {% if latest_scan.hygiene_percentage is not none %}{{ latest_scan.hygiene_percentage }}% Hygiene{% else %}Incomplete{% endif %}
+                        </span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        Scope: <strong>{{ latest_scan.scan_mode_label }}</strong> &bull; Completed: {{ latest_scan.scanned_at }}
+                        {% if latest_scan.warning_count > 0 %}
+                        &bull; <span style="color: var(--status-warn-text); font-weight: 600;">{{ latest_scan.warning_count }} weaknesses detected</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <a href="{{ url_for('results', id=latest_scan.scan_id) }}" class="btn-secondary" style="font-size: 0.8125rem;">
+                        <span>View Audit Report</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Audit Scope Selection Workspace -->
+        <section class="cta-container" aria-label="Available audit scopes">
+            
+            <!-- Mode 1: Hard System Vulnerability Audit (12 Checks) -->
             <div class="scan-mode-card featured">
                 <div>
                     <div class="mode-header">
@@ -61,37 +129,37 @@
                         <h3>Hard System Vulnerability Audit</h3>
                     </div>
                     <p>
-                        A comprehensive 12-point inspection covering exploit surfaces, legacy protocols,
-                        ransomware shields, and system baseline defenses.
+                        Comprehensive 12-point inspection covering network exploit surfaces, legacy protocols, 
+                        ransomware shields, and foundational security baselines.
                     </p>
 
                     <ul class="mode-features">
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>SMBv1 Protocol Exposure (WannaCry / MS17-010 vector)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Remote Desktop &amp; Network Level Authentication</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Remote Desktop (RDP) &amp; Network Level Authentication</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Controlled Folder Access (Ransomware Shield)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Controlled Folder Access (Ransomware Guard)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Defender PUA Shield (Adware &amp; Coin-Miner protection)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Microsoft Defender PUA Shield (Adware &amp; Coin-Miner block)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>PowerShell Script Block Logging (Event ID 4104)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>PowerShell Script Block Logging (Forensic Event ID 4104)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>Anonymous Network Reconnaissance Protection</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>All 6 Fundamental Windows Baseline Controls</span>
                         </li>
                     </ul>
@@ -99,14 +167,14 @@
 
                 <form action="{{ url_for('scan') }}" method="POST" class="scan-form">
                     <input type="hidden" name="mode" value="deep">
-                    <button type="submit" class="btn-primary btn-hard" id="startHardScanBtn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <button type="submit" class="btn-primary" style="width: 100%;" id="startHardScanBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                         <span>Run Hard System Scan (12 Checks)</span>
                     </button>
                 </form>
             </div>
 
-            <!-- Mode 2: Quick Scan (6 checks) -->
+            <!-- Mode 2: Quick Baseline Audit (6 Checks) -->
             <div class="scan-mode-card">
                 <div>
                     <div class="mode-header">
@@ -114,33 +182,33 @@
                         <h3>Quick Baseline Audit</h3>
                     </div>
                     <p>
-                        A quick 6-point check of standard Windows security settings.
-                        Completes in about 2 seconds.
+                        A rapid 6-point verification of standard Windows defenses and security services. 
+                        Completes in approximately 2 seconds.
                     </p>
 
                     <ul class="mode-features">
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Windows Defender Firewall (All Profiles)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Windows Defender Firewall (Domain, Private, Public)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>Microsoft Defender Real-Time Protection</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Virus Definition Freshness (7-day rule)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Virus Definition Signature Freshness (7-day rule)</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>Windows Update Service Configuration</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>User Account Control (UAC) Policy</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>User Account Control (UAC) Elevation Policy</span>
                         </li>
                         <li>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>Local Guest Account Hardening</span>
                         </li>
                     </ul>
@@ -149,117 +217,115 @@
                 <form action="{{ url_for('scan') }}" method="POST" class="scan-form">
                     <input type="hidden" name="mode" value="quick">
                     <button type="submit" class="btn-secondary" style="width: 100%;" id="startQuickScanBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <span>Run Quick Baseline Audit (6 Checks)</span>
                     </button>
                 </form>
             </div>
         </section>
 
-        <!-- Host Telemetry & Local Endpoint Sync -->
-        <section id="real-pc-audit" class="card" style="border: 1px solid rgba(14, 165, 233, 0.35); background: rgba(14, 165, 233, 0.04); margin-bottom: 24px;">
-            <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
-                <div style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; background: rgba(14, 165, 233, 0.15); display: flex; align-items: center; justify-content: center; color: #38bdf8;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                </div>
-                <div style="flex: 1; min-width: 280px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
-                        <h3 style="font-size: 1.15rem; margin: 0;">Audit Any Windows Endpoint on this Cloud Console</h3>
-                        <span class="badge-interactive-sim" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.3);">Endpoint Telemetry Integration</span>
-                    </div>
-                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
-                        Perform automated endpoint audits using the read-only PowerShell collector, or upload telemetry JSON directly to this console:
+        <!-- Endpoint Telemetry & Telemetry Ingestion Card -->
+        <section id="endpoint-sync" class="card">
+            <div class="card-header-clean">
+                <div>
+                    <h3 style="margin-bottom: 2px;">Physical Endpoint Telemetry Ingestion</h3>
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0;">
+                        Audit remote workstations or physical Windows hardware and analyze the results on this dashboard:
                     </p>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
-                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                            <div style="font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 4px;">Option A: 1-Click Endpoint Collector</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Run <code>CyberSage_Scanner.bat</code> to collect local security telemetry in 3 seconds:</div>
-                            <a href="/download-auditor" class="cloud-banner-link" style="font-size: 0.78rem;">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                <span>Download Endpoint Collector (CyberSage_Scanner.bat)</span>
-                            </a>
-                        </div>
-                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                            <div style="font-weight: 700; font-size: 0.85rem; color: #38bdf8; margin-bottom: 4px;">Option B: Ingest Audit Telemetry JSON</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Upload <code>audit_report.json</code> for instant enterprise analysis:</div>
-                            <form action="/upload" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                                <input type="file" name="report_file" accept=".json" required style="font-size: 0.78rem; color: var(--text-muted); max-width: 170px;">
-                                <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 0.78rem; width: auto;">
-                                    Ingest &amp; Analyze Telemetry
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                </div>
+                <span class="status-badge badge-safe">Read-Only Telemetry</span>
+            </div>
+
+            <div class="grid-2">
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px;">
+                    <h4 style="color: var(--brand-text); margin-bottom: 6px;">1. Run Standalone Collector</h4>
+                    <p style="font-size: 0.8125rem; margin-bottom: 12px;">
+                        Execute <code>CyberSage_Scanner.bat</code> on any Windows PC. It collects read-only configuration telemetry in 3 seconds and generates <code>audit_report.json</code>.
+                    </p>
+                    <a href="{{ url_for('download_auditor') }}" class="btn-secondary" style="font-size: 0.78125rem;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Download CyberSage_Scanner.bat</span>
+                    </a>
+                </div>
+
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px;">
+                    <h4 style="color: var(--brand-text); margin-bottom: 6px;">2. Upload Audit Telemetry JSON</h4>
+                    <p style="font-size: 0.8125rem; margin-bottom: 10px;">
+                        Select the generated <code>audit_report.json</code> to load that endpoint's findings and score:
+                    </p>
+                    <form action="{{ url_for('upload_report') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <input type="file" name="report_file" accept=".json" required style="font-size: 0.78125rem; color: var(--text-muted); max-width: 200px;">
+                        <button type="submit" class="btn-primary" style="font-size: 0.78125rem; padding: 6px 12px;">
+                            <span>Ingest &amp; Analyze</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </section>
 
-        <!-- What We Check (Concise, 3-Column Human Overview) -->
+        <!-- Defensive Standards Alignment (CIS / MITRE Framework) -->
         <section class="card">
-            <h2 style="font-size: 1.3rem; margin-bottom: 6px;">How This Scanner Protects You</h2>
-            <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
-                Every check maps directly to recognized cybersecurity baselines (CIS Benchmarks and MITRE ATT&amp;CK):
+            <h3 style="margin-bottom: 4px;">Defensive Standards Alignment</h3>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 18px;">
+                Every audit control maps directly to recognized cybersecurity baselines and exploit mitigation guides:
             </p>
 
-            <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="feature-box">
-                    <h4>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        Network &amp; Legacy Protocol Defense
+            <div class="grid-3">
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+                    <h4 style="font-size: 0.875rem; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Network Surface</span>
                     </h4>
-                    <p>
-                        Audits Windows Firewall states, ensures Network Level Authentication on Remote Desktop,
-                        and detects obsolete SMBv1 protocols vulnerable to network worms.
+                    <p style="font-size: 0.78125rem; margin-bottom: 0;">
+                        Audits Windows Defender Firewall profiles, enforces Network Level Authentication (NLA) on RDP, and confirms legacy SMBv1 protocol is inactive.
                     </p>
                 </div>
 
-                <div class="feature-box">
-                    <h4>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        Malware &amp; Ransomware Protection
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+                    <h4 style="font-size: 0.875rem; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span>Ransomware &amp; Malware</span>
                     </h4>
-                    <p>
-                        Validates that Microsoft Defender is scanning processes in real time, threat signatures are fresh,
-                        and Controlled Folder Access is locking personal files from ransomware.
+                    <p style="font-size: 0.78125rem; margin-bottom: 0;">
+                        Validates Microsoft Defender Real-Time Protection, signature update freshness, and Controlled Folder Access to defend user files against ransomware.
                     </p>
                 </div>
 
-                <div class="feature-box">
-                    <h4>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-                        System Hardening &amp; Logging
+                <div style="background: var(--surface-well); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+                    <h4 style="font-size: 0.875rem; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                        <span>Hardening &amp; Forensics</span>
                     </h4>
-                    <p>
-                        Confirms User Account Control (UAC) elevation prompts are enforced, unused guest accounts
-                        are disabled, and PowerShell script logging captures forensic trails.
+                    <p style="font-size: 0.78125rem; margin-bottom: 0;">
+                        Verifies User Account Control (UAC) enforcement, disables unused local Guest accounts, and activates PowerShell Script Block Logging (Event ID 4104).
                     </p>
                 </div>
             </div>
 
-            <!-- Clean Educational Notice -->
-            <div class="disclaimer-box warning">
-                <h4>Educational Purpose</h4>
+            <!-- Restrained Educational Disclaimer -->
+            <div class="disclaimer-box" style="margin-top: 18px; margin-bottom: 0;">
+                <h4>Educational Scope &amp; Limitations</h4>
                 <p>
-                    Cyber Mistake Detector is designed for education and basic security awareness.
-                    Passing all checks indicates good configuration hygiene, but does not substitute for an enterprise security audit.
+                    Cyber Mistake Detector is an educational defensive auditing tool. Passing baseline configuration checks confirms adherence to 
+                    recommended hygiene practices, but does not guarantee total protection from zero-day exploits or active malware infections.
                 </p>
             </div>
         </section>
+
     </main>
 
-    <!-- Scan Progress Overlay -->
-    <div id="scanOverlay" class="scan-overlay" role="dialog" aria-modal="true" aria-label="Scan in progress">
+    <!-- Scan Progress Overlay (Indeterminate honest loader) -->
+    <div id="scanOverlay" class="scan-overlay" role="dialog" aria-modal="true" aria-label="Executing host security audit">
         <div class="spinner"></div>
-        <div class="scan-overlay-title">Scanning System Settings...</div>
-        <div class="scan-overlay-desc">Reading local configurations safely in read-only mode. Please wait a few seconds.</div>
+        <div class="scan-overlay-title">Executing Host Security Audit...</div>
+        <div class="scan-overlay-desc">Reading local system configuration in read-only mode. Please wait.</div>
     </div>
 
-    <!-- Footer -->
+    <!-- Application Footer -->
     <footer>
         <div class="container">
-            <p><strong>Cyber Mistake Detector</strong> &bull; Educational Cybersecurity Tool</p>
-            <p>Safe Execution &bull; Read-Only &bull; No Data Leaves Your Machine</p>
+            <p><strong>Cyber Mistake Detector</strong> &bull; Educational Defensive Cybersecurity Project</p>
+            <p>Safe Execution &bull; Read-Only Local Assessment &bull; Zero External Data Transmission</p>
         </div>
     </footer>
 
