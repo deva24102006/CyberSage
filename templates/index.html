@@ -19,9 +19,14 @@
                 </span>
                 <span>Cyber Mistake Detector</span>
             </a>
-            <div class="live-indicator">
-                <span class="pulse-dot"></span>
-                <span>SYSTEM SCANNER &bull; READY</span>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="{{ url_for('train_model_endpoint') }}" class="btn-secondary" style="font-size: 0.78rem; padding: 5px 12px; border-color: rgba(147, 51, 234, 0.4); color: #c084fc;">
+                    AI Model Training
+                </a>
+                <div class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>SYSTEM SCANNER &bull; READY</span>
+                </div>
             </div>
         </div>
     </header>

@@ -126,7 +126,37 @@ def results():
         logger.info("Switching report mode from '%s' to '%s'.", latest_report.get("scan_mode"), mode)
         latest_report = scan_system(mode=mode)
 
+    if latest_report is not None and "results" in latest_report:
+        try:
+            from ml_engine import predict_endpoint_risk
+            latest_report["ml_prediction"] = predict_endpoint_risk(latest_report.get("results", []))
+        except Exception as exc:
+            logger.warning("Could not execute ML risk prediction: %s", exc)
+
     return render_template("results.html", report=latest_report)
+
+
+@app.route("/train-model", methods=["GET", "POST"])
+def train_model_endpoint():
+    """Renders ML model analytics or triggers retraining on cybersecurity dataset."""
+    meta_path = os.path.join(app.root_path, "models", "model_metadata.json")
+    if request.method == "POST":
+        try:
+            from train_model import train
+            metadata = train()
+            return redirect(url_for("train_model_endpoint", retrained="true"))
+        except Exception as exc:
+            logger.error("Failed to retrain ML model: %s", exc)
+
+    metadata = {}
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        except Exception as exc:
+            logger.warning("Could not read model metadata: %s", exc)
+
+    return render_template("train.html", metadata=metadata)
 
 
 @app.route("/upload", methods=["POST"])
