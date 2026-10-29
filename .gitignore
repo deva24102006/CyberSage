@@ -46,3 +46,7 @@ htmlcov/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# SQLite databases
+*.db
+data/*.db

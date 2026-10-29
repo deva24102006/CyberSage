@@ -68,7 +68,7 @@ class TestApp(unittest.TestCase):
         with patch("app.scan_system", return_value=mock_report):
             post_response = self.client.post("/scan", data={"mode": "deep"})
             self.assertEqual(post_response.status_code, 302)
-            self.assertTrue(post_response.location.endswith("/results"))
+            self.assertIn("/results", post_response.location)
 
             results_response = self.client.get("/results")
             self.assertEqual(results_response.status_code, 200)

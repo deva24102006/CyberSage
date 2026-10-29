@@ -1,14 +1,21 @@
 /**
  * Cyber Mistake Detector - Frontend Client Script
+ *
  * Provides:
  * - Real-time client-side search & category filtering
  * - Expand / Collapse all accordion toggle
  * - 1-Click CLI command clipboard copy
  * - Print / PDF export
  * - Scan overlay & button loading state
+ * - Authoritative backend-driven remediation verification (Zero client-side score fabrication)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Clean up any legacy localStorage remediation overrides so backend remains authoritative single source of truth
+    try {
+        localStorage.removeItem("cybersage_remediated_checks");
+    } catch (_) {}
+
     // 1. Scan Form Submission & Loading Overlay
     const scanForms = document.querySelectorAll("form.scan-form");
     const scanOverlay = document.getElementById("scanOverlay");
@@ -121,15 +128,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 await navigator.clipboard.writeText(commandText);
-                const originalText = btn.innerText;
-                btn.innerText = "✓ Copied!";
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<span style="color: #34d399;">✓ Copied!</span>`;
                 btn.style.borderColor = "#10b981";
-                btn.style.color = "#34d399";
 
                 setTimeout(() => {
-                    btn.innerText = originalText;
+                    btn.innerHTML = originalHtml;
                     btn.style.borderColor = "";
-                    btn.style.color = "";
                 }, 2000);
             } catch (err) {
                 console.error("Clipboard copy failed: ", err);
@@ -148,84 +153,47 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 6. Interactive Remediation Verification & Dynamic Hygiene Score
-    const verifyButtons = document.querySelectorAll(".btn-verify-fix");
-    const resetBtn = document.getElementById("resetRemediationsBtn");
-    const gaugeFill = document.querySelector(".gauge-fill");
-    const meterScoreText = document.querySelector(".meter-score-text");
-    const statSafe = document.querySelector(".stat-safe");
-    const statWarn = document.querySelector(".stat-warn");
-    const statHigh = document.querySelector(".stat-high");
-
-    const STORAGE_KEY = "cybersage_remediated_checks";
-
-    function getRemediatedChecks() {
-        try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-        } catch {
-            return [];
-        }
-    }
-
-    function saveRemediatedChecks(list) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        } catch (e) {
-            console.error("Could not save to localStorage", e);
-        }
-    }
-
-    function showToast(msg) {
+    // 6. UI Toast Notifications
+    function showToast(msg, type = "success") {
         const existing = document.querySelector(".cyber-toast");
         if (existing) existing.remove();
 
         const toast = document.createElement("div");
-        toast.className = "cyber-toast";
-        toast.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>${msg}</span>
-        `;
+        toast.className = `cyber-toast ${type === "error" ? "toast-error" : ""}`;
+        const icon = type === "error"
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+        toast.innerHTML = `${icon}<span>${escapeHtml(msg)}</span>`;
         document.body.appendChild(toast);
         setTimeout(() => {
             if (toast && toast.parentNode) toast.remove();
-        }, 4000);
+        }, 5000);
     }
 
-    function recalculateDashboard() {
-        const cards = document.querySelectorAll(".result-card");
-        if (!cards.length) return;
+    function escapeHtml(str) {
+        if (!str) return "";
+        const div = document.createElement("div");
+        div.innerText = str;
+        return div.innerHTML;
+    }
 
-        let total = cards.length;
-        let safeCount = 0;
-        let warnCount = 0;
-        let highCount = 0;
+    // 7. Authoritative Backend Score Update (Reflects ONLY verified server data)
+    function updateScoreDisplay(score, safeCount, warnCount) {
+        const gaugeFill = document.querySelector(".gauge-fill");
+        const meterScoreText = document.querySelector(".meter-score-text");
+        const statSafe = document.querySelector(".stat-safe");
+        const statWarn = document.querySelector(".stat-warn");
 
-        cards.forEach((card) => {
-            const status = (card.getAttribute("data-status") || "").toLowerCase();
-            const severity = (card.getAttribute("data-severity") || "").toLowerCase();
-
-            if (status === "safe") {
-                safeCount++;
-            } else if (status === "warning") {
-                warnCount++;
-                if (severity === "high") highCount++;
-            }
-        });
-
-        const evaluated = safeCount + warnCount;
-        const pct = evaluated > 0 ? Math.round((safeCount / evaluated) * 100) : 0;
-
-        // Update score text
-        if (meterScoreText) {
-            meterScoreText.innerText = `${pct}%`;
+        if (meterScoreText && typeof score === "number") {
+            meterScoreText.innerText = `${score}%`;
         }
 
-        // Update SVG circular gauge
-        if (gaugeFill) {
+        if (gaugeFill && typeof score === "number") {
             const circumference = 314.159;
-            const offset = circumference - (pct / 100 * circumference);
+            const offset = circumference - (score / 100 * circumference);
             gaugeFill.style.strokeDashoffset = offset;
-            if (pct >= 70) {
+            if (score >= 70) {
                 gaugeFill.classList.remove("gauge-fill-warn");
                 gaugeFill.classList.add("gauge-fill-safe");
             } else {
@@ -234,86 +202,127 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Update Stat cards
-        if (statSafe) statSafe.innerText = safeCount;
-        if (statWarn) statWarn.innerText = warnCount;
-        if (statHigh) statHigh.innerText = highCount;
+        if (statSafe && typeof safeCount === "number") statSafe.innerText = safeCount;
+        if (statWarn && typeof warnCount === "number") statWarn.innerText = warnCount;
 
-        // Update filter pills
-        const warnPill = document.querySelector('.filter-btn[data-filter="warning"]');
-        if (warnPill) warnPill.innerText = `Weaknesses (${warnCount})`;
-        const safePill = document.querySelector('.filter-btn[data-filter="safe"]');
-        if (safePill) safePill.innerText = `Passed (${safeCount})`;
-        const highPill = document.querySelector('.filter-btn[data-filter="high"]');
-        if (highPill) highPill.innerText = `High Severity (${highCount})`;
-
-        // Show/hide reset button
-        const remediatedList = getRemediatedChecks();
-        if (resetBtn) {
-            resetBtn.style.display = remediatedList.length > 0 ? "inline-flex" : "none";
+        // Update filter pills with authoritative counts
+        if (typeof warnCount === "number") {
+            const warnPill = document.querySelector('.filter-btn[data-filter="warning"]');
+            if (warnPill) warnPill.innerText = `Weaknesses (${warnCount})`;
+        }
+        if (typeof safeCount === "number") {
+            const safePill = document.querySelector('.filter-btn[data-filter="safe"]');
+            if (safePill) safePill.innerText = `Passed (${safeCount})`;
         }
     }
 
-    function applyRemediation(checkName, buttonEl, persist) {
-        const card = buttonEl.closest(".result-card");
-        if (!card) return;
+    // 8. Authoritative Backend Remediation Verification Workflow
+    const verifyButtons = document.querySelectorAll(".btn-verify-fix");
 
-        // Update card visual state
-        card.setAttribute("data-status", "safe");
-        card.classList.remove("status-warning");
-        card.classList.add("status-safe");
-
-        // Update status badge
-        const badge = card.querySelector(".status-badge");
-        if (badge) {
-            badge.className = "status-badge badge-safe";
-            badge.innerText = "SAFE (REMEDIATED)";
-        }
-
-        // Update button
-        buttonEl.classList.add("is-remediated");
-        buttonEl.disabled = true;
-        buttonEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>✓ Remediated &amp; Verified</span>`;
-
-        if (persist) {
-            const list = getRemediatedChecks();
-            if (!list.includes(checkName)) {
-                list.push(checkName);
-                saveRemediatedChecks(list);
-            }
-            recalculateDashboard();
-            const currentPct = meterScoreText ? meterScoreText.innerText : "";
-            showToast(`[${checkName}] verified as remediated! Score updated to ${currentPct}.`);
-        }
-    }
-
-    // Attach click handlers to verify buttons
     verifyButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const checkName = btn.getAttribute("data-check-name");
-            if (checkName) {
-                applyRemediation(checkName, btn, true);
+        btn.addEventListener("click", async () => {
+            const controlId = btn.getAttribute("data-control-id");
+            const checkName = btn.getAttribute("data-check-name") || controlId;
+            const scanId = btn.getAttribute("data-scan-id") || window.CURRENT_SCAN_ID;
+            const card = btn.closest(".result-card");
+            const feedbackEl = card ? card.querySelector(".verify-feedback") : null;
+
+            if (!controlId || !scanId) {
+                showToast("Missing control identifier or scan reference.", "error");
+                return;
+            }
+
+            // Set loading state
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-inline"></span> Probing Endpoint...`;
+
+            if (feedbackEl) {
+                feedbackEl.style.display = "none";
+                feedbackEl.className = "verify-feedback";
+            }
+
+            try {
+                const response = await fetch("/api/verify-control", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        scan_id: scanId,
+                        control_id: controlId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success === true) {
+                    // Control is legitimately verified as SAFE by backend probe
+                    if (card) {
+                        card.setAttribute("data-status", "safe");
+                        card.classList.remove("status-warning", "status-error", "status-unknown");
+                        card.classList.add("status-safe");
+
+                        const badge = card.querySelector(".status-badge");
+                        if (badge) {
+                            badge.className = "status-badge badge-safe";
+                            badge.innerText = "SAFE (VERIFIED)";
+                        }
+
+                        const detailsEl = card.querySelector(".observed-state-text");
+                        if (detailsEl && data.details) {
+                            detailsEl.innerText = data.details;
+                        }
+                    }
+
+                    btn.classList.add("is-remediated");
+                    btn.disabled = true;
+                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>✓ Verified Safe</span>`;
+
+                    if (feedbackEl) {
+                        feedbackEl.className = "verify-feedback feedback-success";
+                        feedbackEl.innerText = `✓ Live verification confirmed: ${data.message || "Setting is verified secure."}`;
+                    }
+
+                    if (typeof data.score === "number") {
+                        updateScoreDisplay(data.score, data.safe_count, data.warning_count);
+                    }
+
+                    showToast(`[${checkName}] verified as SAFE! Hygiene score updated.`, "success");
+                } else {
+                    // Probe detected that setting is STILL INSECURE or inconclusive
+                    // DO NOT MARK SAFE; SCORE DOES NOT CHANGE
+                    btn.disabled = false;
+                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Re-Verify Fix</span>`;
+
+                    const errorMsg = data.message || "Control is still insecure on this endpoint. Score remains unchanged.";
+
+                    if (feedbackEl) {
+                        feedbackEl.className = "verify-feedback feedback-failure";
+                        feedbackEl.innerText = `✗ Verification failed: ${errorMsg}`;
+                    }
+
+                    if (card && data.details) {
+                        const detailsEl = card.querySelector(".observed-state-text");
+                        if (detailsEl) {
+                            detailsEl.innerText = data.details;
+                        }
+                    }
+
+                    showToast(`Verification Failed: ${errorMsg}`, "error");
+                }
+            } catch (err) {
+                console.error("Verification error:", err);
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+
+                if (feedbackEl) {
+                    feedbackEl.className = "verify-feedback feedback-failure";
+                    feedbackEl.innerText = "✗ Network communication error during endpoint probe.";
+                }
+
+                showToast("Failed to communicate with verification API.", "error");
             }
         });
     });
-
-    // Restore any previously saved remediations on page load
-    const saved = getRemediatedChecks();
-    if (saved.length > 0) {
-        verifyButtons.forEach((btn) => {
-            const checkName = btn.getAttribute("data-check-name");
-            if (checkName && saved.includes(checkName)) {
-                applyRemediation(checkName, btn, false);
-            }
-        });
-        recalculateDashboard();
-    }
-
-    // Reset button handler
-    if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-            localStorage.removeItem(STORAGE_KEY);
-            window.location.reload();
-        });
-    }
 });
