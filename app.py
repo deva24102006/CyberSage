@@ -509,7 +509,8 @@ def internal_server_error(e):
 if __name__ == "__main__":
     print("=" * 60)
     print(" Cyber Mistake Detector - Educational Security Dashboard")
-    print(" Running locally at: http://127.0.0.1:5000/")
+    print(" Local Machine URL  : http://127.0.0.1:5000/")
+    print(" Other Systems (LAN): http://192.168.1.72:5000/")
     print(" Press Ctrl+C in this terminal to stop the server.")
     print("=" * 60)
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)
