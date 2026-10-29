@@ -41,25 +41,44 @@
     <!-- Main Workspace -->
     <main class="container">
         
-        <!-- Page Title & Context Header -->
-        <section class="page-header intro-hero">
-            <div class="page-title-group">
+        <!-- Dashboard Security Executive Hero with Visual Anchor -->
+        <section class="dashboard-hero-card" aria-label="Security auditor dashboard overview">
+            <div class="dashboard-hero-content">
+                <div class="hero-tag-row">
+                    <span class="mode-badge badge-purple">DEFENSIVE AUDITOR</span>
+                    <span class="status-badge badge-safe">CIS Benchmark v8.1</span>
+                    <span class="status-badge badge-blue">MITRE ATT&amp;CK Matrix</span>
+                </div>
                 <h1>Host Security &amp; Defensive Baseline Auditor</h1>
-                <p>
-                    Automated, read-only inspection of Windows security configurations, legacy network vectors, 
-                    and ransomware defenses aligned with CIS Benchmarks and MITRE ATT&amp;CK.
+                <p class="hero-desc">
+                    Automated, read-only inspection of Windows security configurations, legacy network vectors (SMBv1), 
+                    ransomware defenses, and forensic logging with machine learning breach prediction.
                 </p>
+                <div class="hero-actions">
+                    <form action="{{ url_for('scan') }}" method="POST" class="scan-form" style="display: inline-block;">
+                        <input type="hidden" name="mode" value="deep">
+                        <button type="submit" class="btn-primary" id="heroStartDeepScanBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span>Run Hard System Scan (12 Checks)</span>
+                        </button>
+                    </form>
+                    <a href="#endpoint-sync" class="btn-secondary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        <span>Endpoint Telemetry</span>
+                    </a>
+                    <a href="{{ url_for('download_auditor') }}" class="btn-secondary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Download Collector (.bat)</span>
+                    </a>
+                </div>
             </div>
 
-            <div class="page-actions">
-                <a href="#endpoint-sync" class="btn-secondary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    <span>Endpoint Telemetry</span>
-                </a>
-                <a href="{{ url_for('download_auditor') }}" class="btn-secondary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    <span>Download Collector (.bat)</span>
-                </a>
+            <div class="dashboard-hero-image-wrap">
+                <img src="{{ url_for('static', filename='images/dashboard-hero.jpg') }}" alt="Cyber Mistake Detector Defensive Architecture" class="dashboard-hero-img">
+                <div class="hero-image-overlay-badge">
+                    <span class="pulse-dot"></span>
+                    <span>ACTIVE DEFENSE &bull; HOST SHIELD</span>
+                </div>
             </div>
         </section>
 
