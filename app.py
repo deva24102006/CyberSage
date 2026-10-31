@@ -49,6 +49,13 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "cyber-sage-enterprise-key-2
 # Initialize SQLite database schema on startup
 init_db()
 
+# Preload ML models on startup for instant scan performance
+try:
+    from ml_engine import load_ml_models
+    load_ml_models()
+except Exception as _exc:
+    logger.warning("ML model startup pre-warm skipped: %s", _exc)
+
 
 @app.before_request
 def ensure_session_identity():
@@ -507,10 +514,12 @@ def internal_server_error(e):
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    host = os.environ.get("HOST", "0.0.0.0")
     print("=" * 60)
     print(" Cyber Mistake Detector - Educational Security Dashboard")
-    print(" Local Machine URL  : http://127.0.0.1:5000/")
-    print(" Other Systems (LAN): http://192.168.1.72:5000/")
+    print(f" Local Machine URL  : http://127.0.0.1:{port}/")
+    print(f" Server Listening   : http://{host}:{port}/")
     print(" Press Ctrl+C in this terminal to stop the server.")
     print("=" * 60)
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host=host, port=port, debug=False)

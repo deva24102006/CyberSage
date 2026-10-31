@@ -44,28 +44,54 @@
 
 ---
 
-## 3. How to Launch and Use
+## 3. How to Launch and Deploy
 
-### 1-Click Launch:
-Double-click the **`run.bat`** file inside the project directory:
-`C:\Users\LAB 02\Desktop\CYBER MISTAKE DETECTOR\run.bat`
+### Option A: Local Multi-Threaded Production Deployment (Windows / LAN)
+Run with the high-performance, multi-threaded production WSGI server (**Waitress**):
+* **1-Click Launch:** Double-click `run_production.bat`
+* **Or via Terminal:**
+  ```powershell
+  python wsgi.py
+  ```
+The server binds to `0.0.0.0:5000` with 4 concurrent worker threads, ready to serve both the local machine and other machines across the local area network.
 
-### Or via Terminal:
-```powershell
-cd "C:\Users\LAB 02\Desktop\CYBER MISTAKE DETECTOR"
-python app.py
+### Option B: 1-Click Free Cloud Deployment (Render Blueprint)
+1. Fork or push this repository to your GitHub account (`https://github.com/deva24102006/CyberSage`).
+2. Log into [Render.com](https://render.com) and click **New +** > **Blueprint**.
+3. Select your repository. Render automatically reads `render.yaml` and deploys the app with `gunicorn wsgi:app` on the free tier.
+4. Your application will be live at `https://your-app-name.onrender.com`.
+
+### Option C: Universal Container Deployment (Docker)
+Build and run anywhere (AWS ECS, Google Cloud Run, Azure App Service, or self-hosted Docker):
+```bash
+docker build -t cyber-mistake-detector .
+docker run -d -p 5000:5000 cyber-mistake-detector
 ```
 
-Open your browser to:
-**[http://127.0.0.1:5000/](http://127.0.0.1:5000/)**
+### Option D: Local Development Launch
+```powershell
+python app.py
+```
+Open your browser to: **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)**
 
 ---
 
-## 4. Automated Tests
+## 4. Auditing Remote Windows Endpoints via Cloud Deployment
+
+When Cyber Mistake Detector is deployed in the cloud (Linux host):
+1. Navigate to the cloud URL and click **Download Collector (.bat)** (`CyberSage_Scanner.bat`).
+2. Run `CyberSage_Scanner.bat` on any physical Windows target PC with standard user privileges.
+3. The collector executes safe, read-only PowerShell probes and exports `audit_report.json`.
+4. Upload `audit_report.json` on the cloud web dashboard under **Endpoint Telemetry**.
+5. The cloud engine automatically parses findings, computes the authoritative hygiene score, and runs the ML breach prediction model.
+
+---
+
+## 5. Automated Tests
 
 Run the deterministic test suite:
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-**Status:** `32 passed, 0 failures, 0 errors`.
+**Status:** `62 passed, 0 failures, 0 errors` (in under 1 second).
